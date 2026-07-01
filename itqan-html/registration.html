@@ -322,7 +322,17 @@ function attachRegisterEvents() {
   document.getElementById("login-link").onclick = () => loadLoginForm();
   document.getElementById("forgot-link").onclick = () => loadForgotForm();
 
-  document.getElementById("google-btn").onclick = () => showAlert(safeT("auth.clickGoogle", "Google login clicked"));
+  document.getElementById("google-btn").onclick = async () => {
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: "google"
+  });
+
+  if (error) {
+    console.error(error);
+    showAlert("حدث خطأ أثناء تسجيل الدخول");
+  }
+};
+
   document.getElementById("apple-btn").onclick = () => showAlert(safeT("auth.clickApple", "Apple login clicked"));
 }
 
@@ -374,6 +384,26 @@ function attachForgotEvents() {
 
 loadRegisterForm();
 </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = supabase;
+
+  const supabaseUrl = "https://jacylpaxxgubvhofpuup.supabase.co";
+  const supabaseAnonKey = "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai";
+
+  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+</script>
+
+
+
+<script src="app.js"></script>
+
+
+
+
+
 
 </body>
 </html>
