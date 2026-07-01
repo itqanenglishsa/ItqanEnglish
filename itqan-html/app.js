@@ -1200,4 +1200,12 @@ function goToSalla(courseKey){
   alert("سيتم تفعيل الشراء عبر تطبيق سلة قريبًا ❤️");
 }
 
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (session && session.user) {
+    const email = session.user.email;
 
+    localStorage.setItem("userEmail", email);
+
+    window.location.href = "profile.html";
+  }
+});
