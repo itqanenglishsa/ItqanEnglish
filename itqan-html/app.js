@@ -1200,3 +1200,19 @@ function goToSalla(courseKey){
   alert("سيتم تفعيل الشراء عبر تطبيق سلة قريبًا ❤️");
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const googleBtn = document.getElementById("google-btn");
+
+  if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google"
+      });
+
+      if (error) {
+        console.error("Login error:", error);
+      }
+    });
+  }
+});
+
