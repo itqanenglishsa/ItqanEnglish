@@ -1199,3 +1199,7 @@ document.getElementById("auth-trigger-icon").onclick = () => {
 function goToSalla(courseKey){
   alert("سيتم تفعيل الشراء عبر تطبيق سلة قريبًا ❤️");
 }
+
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: "google"
+});
