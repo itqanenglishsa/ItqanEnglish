@@ -1,0 +1,151 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Itqan English — Official English Proficiency Placement Test</title>
+<meta name="description" content="Take the official Itqan English proficiency test. Accurate CEFR-based placement (A1–C2)."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="itqan-html/styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet"/>
+</head><body>
+
+  <header class="header">
+  <div class="header-inner">
+
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" alt="Logo" style="height:40px">
+    </a>
+
+    <a href="#" id="auth-trigger-icon" class="user-icon-link">
+      <img src="images/UserIcon.png" alt="User" style="height:35px; width:35px; object-fit:contain;">
+    </a>
+
+    <nav class="nav">
+      <div class="menu-wrap">
+        <button id="menu-trigger" class="pill" aria-haspopup="true">
+          ☰ <span data-i18n="nav.menu">القائمة</span>
+        </button>
+
+        <div id="menu-panel" class="menu-panel">
+          <a href="index.html" data-i18n="nav.home">الرئيسية</a>
+          <a href="itqan-html/courses.html" data-i18n="nav.courses">الدورات</a>
+          <a href="itqan-html/about.html" data-i18n="nav.about">عن المنصة</a>
+        </div>
+      </div>
+
+      <button class="pill" onclick="setLang(getLang()==='en'?'ar':'en')">
+        🌐 <span data-i18n="lang.toggle" style="display:none;">English</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <div id="auth-modal-overlay" class="pop-modal-overlay">
+    <div class="pop-modal-content-box">
+      <button id="close-modal-btn" class="pop-close-modal-x">&times;</button>
+      <div class="pop-logo-wrapper">
+        <img src="images/logo.png" class="pop-auth-logo" alt="Logo">
+      </div>
+      <div id="pop-dynamic-form"></div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div><div class="hero-blob"></div>
+  <div class="hero-grid">
+    <div>
+      <span class="badge">🛡 <span data-i18n="home.badge"></span></span>
+      <h1 class="h1 mt-5"><span data-i18n="home.title.1"></span><span class="h1-grad" data-i18n="home.title.2"></span></h1>
+      <p class="lead" data-i18n="home.subtitle"></p>
+      <div class="mt-8 flex items-center gap-4" style="flex-wrap:wrap">
+        <a href="itqan-html/test.html" class="cta cta-lg"><span data-i18n="home.cta.start"></span> →</a>
+        <span class="muted text-sm">⏱ <span data-i18n="home.cta.meta"></span></span>
+      </div>
+
+    </div>
+    <div>
+      <div class="card card-lg">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs muted font-medium" style="text-transform:uppercase;letter-spacing:.1em" data-i18n="home.demo.qcount"></span>
+          <span class="lvl-pill lvl-pill-sm" data-i18n="home.demo.section"></span>
+        </div>
+        <p class="text-xl font-semibold">If it ___ tomorrow, we will stay at home.</p>
+        <div class="mt-5" style="display:flex;flex-direction:column;gap:.625rem">
+          <div class="opt">rain</div>
+          <div class="opt opt-active">rains</div>
+          <div class="opt">rained</div>
+          <div class="opt">will rain</div>
+        </div>
+        <div class="demo-progress"><div class="demo-bar"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div style="max-width:42rem;margin-bottom:3rem">
+    <h2 class="h2" data-i18n="home.features.title"></h2>
+    <p class="muted mt-3" data-i18n="home.features.desc"></p>
+  </div>
+  <div class="grid grid-3">
+    <div class="card"><div class="feature-icon">✎</div><h3 class="text-lg font-semibold mt-4" data-i18n="home.feat.grammar.t"></h3><p class="muted text-sm mt-2" data-i18n="home.feat.grammar.d"></p></div>
+    <div class="card"><div class="feature-icon">📖</div><h3 class="text-lg font-semibold mt-4" data-i18n="home.feat.reading.t"></h3><p class="muted text-sm mt-2" data-i18n="home.feat.reading.d"></p></div>
+    <div class="card"><div class="feature-icon">💬</div><h3 class="text-lg font-semibold mt-4" data-i18n="home.feat.vocab.t"></h3><p class="muted text-sm mt-2" data-i18n="home.feat.vocab.d"></p></div>
+  </div>
+
+  <div class="card card-lg mt-16">
+    <div class="flex items-center justify-between mb-6"><h3 class="text-xl font-semibold" data-i18n="home.cefr.title"></h3><span>🎧</span></div>
+    <div class="grid grid-6 grid-6-sm">
+      <div class="card" style="text-align:center;padding:1rem;"><div class="text-2xl font-bold">A1</div><div class="muted text-xs mt-2" data-i18n="cefr.A1"></div></div><div class="card" style="text-align:center;padding:1rem;"><div class="text-2xl font-bold">A2</div><div class="muted text-xs mt-2" data-i18n="cefr.A2"></div></div><div class="card" style="text-align:center;padding:1rem;"><div class="text-2xl font-bold">B1</div><div class="muted text-xs mt-2" data-i18n="cefr.B1"></div></div><div class="card" style="text-align:center;padding:1rem;background:var(--peach)"><div class="text-2xl font-bold">B2</div><div class="muted text-xs mt-2" data-i18n="cefr.B2"></div></div><div class="card" style="text-align:center;padding:1rem;background:var(--peach)"><div class="text-2xl font-bold">C1</div><div class="muted text-xs mt-2" data-i18n="cefr.C1"></div></div><div class="card" style="text-align:center;padding:1rem;background:var(--peach)"><div class="text-2xl font-bold">C2</div><div class="muted text-xs mt-2" data-i18n="cefr.C2"></div></div>
+    </div>
+  </div>
+
+  <div class="mt-16 text-center" style="display:flex;flex-direction:column;align-items:center">
+    <h3 class="h2" data-i18n="home.ready.title"></h3>
+    <br>
+    <a href="itqan-html/courses.html" class="cta" data-i18n="home.ready.cta"></a>
+  </div>
+
+  <div class="card card-lg mt-16 text-center">
+    <h3 class="h2" data-i18n="home.app.title"></h3>
+    <p class="muted mt-3" data-i18n="home.app.desc"></p>
+    <div class="stores" style="justify-content:center">
+  <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
+  <img src="images/appleIcon.png" alt="Download on the App Store" style="height:50px">
+</a>
+  <div class="store store-disabled" aria-disabled="true">
+    <span style="font-size:1.5rem">▶</span>
+    <span class="store-lines"><span class="store-top" data-i18n="store.google.top"></span><span class="store-bot" data-i18n="store.google.soon"></span></span>
+  </div>
+</div>
+  </div>
+</section>
+
+<footer class="footer"><div class="footer-inner">
+
+<div class="box">
+    <h3 style="font-size: 1.2rem; margin:0; padding:0; margin-left:5px;" data-i18n="footer.contact">
+    Contact Us
+</h3>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
+        <a href="https://wa.me/966508538283" target="_blank">
+            <img src="images/WhatsAppIcon.png" style="width:31px; height:31px;">
+        </a>
+
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
+            <img src="images/TikTokIcon.png" style="width:30px; height:30px;">
+        </a>
+
+        <a href="https://t.me/Itqanenglish_sa" target="_blank">
+            <img src="images/TelegramIcon.png" style="width:30px; height:30px;">
+        </a>
+    </div>
+</div>
+
+  <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
+</div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+<script src="itqan-html/app.js"></script></body></html>

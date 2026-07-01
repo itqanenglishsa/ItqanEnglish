@@ -1,0 +1,225 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Take the Placement Test — Itqan English</title>
+<meta name="description" content="32-question CEFR placement test."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet"/>
+</head><body>
+
+<header class="header">
+ <div class="header-inner">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="Logo" style="height:40px">
+  </a>
+
+  <a href="#" id="auth-trigger-icon" class="user-icon-link">
+    <img src="../images/UserIcon.png" alt="User" style="height:35px; width:35px; object-fit:contain;">
+  </a>
+
+  <nav class="nav">
+    <div class="menu-wrap">
+      <button id="menu-trigger" class="pill" aria-haspopup="true">
+        ☰ <span data-i18n="nav.menu">القائمة</span>
+      </button>
+
+      <div id="menu-panel" class="menu-panel">
+        <a href="../index.html" data-i18n="nav.home">الرئيسية</a>
+        <a href="courses.html" data-i18n="nav.courses">الدورات</a>
+        <a href="about.html" data-i18n="nav.about">عن المنصة</a>
+      </div>
+    </div>
+
+    <button class="pill" onclick="setLang(getLang()==='en'?'ar':'en')">
+        🌐
+      <span data-i18n="lang.toggle" style="display:none;">English</span>
+    </button>
+  </nav>
+</div>
+
+<div id="auth-modal-overlay" class="pop-modal-overlay">
+  <div class="pop-modal-content-box">
+    <button id="close-modal-btn" class="pop-close-modal-x">&times;</button>
+    
+    <div class="pop-logo-wrapper">
+      <img src="../images/logo.png" class="pop-auth-logo" alt="Logo">
+    </div>
+    
+    <div id="pop-dynamic-form"></div>
+  </div>
+</div>
+</header>
+
+<main id="test-root" class="container-tight" style="padding:2.5rem 1.5rem"></main>
+<script>
+const STORAGE_KEY = "itqan_test_answers";
+let state = { started:false, index:0, answers:{}, secondsLeft:20*60, timer:null };
+
+function renderIntro(){
+  document.getElementById('test-root').innerHTML = `
+    <div class="card card-lg" style="padding:2.5rem">
+      <span class="badge" style="background:color-mix(in oklch,var(--primary) 10%,transparent);border-color:transparent;color:var(--primary);font-weight:600">🛡 ${t('test.intro.badge')}</span>
+      <h1 class="h1 mt-4" style="font-size:2.25rem">${t('test.intro.title')}</h1>
+      <p class="muted mt-3">${t('test.intro.desc')}</p>
+      <ul class="mt-6" style="display:flex;flex-direction:column;gap:.75rem;font-size:.875rem">
+        ${['r1','r2','r3','r4'].map(r=>`<li style="display:flex;gap:.75rem"><span style="margin-top:.5rem;width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0"></span>${t('test.intro.'+r)}</li>`).join('')}
+      </ul>
+      <button class="cta cta-lg mt-8" onclick="start()">${t('test.intro.cta')} →</button>
+    </div>`;
+}
+
+function start(){
+  state.started = true;
+
+  // خلط الأسئلة عشوائياً قبل بدء الاختبار
+  QUESTIONS.sort(() => Math.random() - 0.5);
+
+  state.timer = setInterval(()=>{
+    state.secondsLeft = Math.max(0, state.secondsLeft-1);
+    updateTimer();
+    if(state.secondsLeft === 0) finish();
+  }, 1000);
+
+  renderQ();
+}
+
+function updateTimer(){
+  const el = document.getElementById('timer');
+  if(!el) return;
+  const mm = String(Math.floor(state.secondsLeft/60)).padStart(2,'0');
+  const ss = String(state.secondsLeft%60).padStart(2,'0');
+  el.textContent = mm+':'+ss;
+}
+
+function renderQ(){
+ 
+  const q = QUESTIONS[state.index];
+  const total = QUESTIONS.length;
+  const progress = Math.round((state.index/total)*100);
+  const selected = state.answers[q.id];
+  document.getElementById('test-root').innerHTML = `
+    <div class="flex items-center justify-between text-sm mb-6">
+      <span class="muted font-medium">${t('test.qof',{n:state.index+1,t:total})}</span>
+      <span class="timer">⏱ <span id="timer">00:00</span></span>
+    </div>
+    <div class="q-bar"><div class="q-bar-fill" style="width:${progress}%"></div></div>
+    <div class="card card-lg" style="padding:2rem">
+      <div class="mb-3"><span class="lvl-pill lvl-pill-sm" style="background:color-mix(in oklch,var(--primary) 10%,transparent);color:var(--primary)">${t('section.'+q.section)}</span></div>
+      ${q.context?`<div class="q-context">${q.context}</div>`:''}
+     
+     <h2 class="text-2xl font-semibold q-prompt-text" style="display:block; text-align:left;">
+  ${q.section === "Listening" ? `
+    <div style="display: flex; justify-content: center; width: 100%;">
+      <button class="audio-btn" onclick="playAudio('${q.audioSrc}')" style="display: inline-flex; justify-content: center; align-items: center; border: 2px solid #3B82F6; border-radius: 50%; width: 60px; height: 60px; padding: 10px; background: transparent; margin-bottom: 10px;">
+        <svg viewBox="0 0 64 64" width="100%" height="100%">
+          <path d="M26 20 L18 26 H12 C10.9 26 10 26.9 10 28 V36 C10 37.1 10.9 38 12 38 H18 L26 44 C27.1 44 28 43.1 28 42 V22 C28 20.9 27.1 20 26 20 Z" fill="#3B82F6"/>
+          <path d="M34 24 C37 26 39 29 39 32 C39 35 37 38 34 40" stroke="#3B82F6" stroke-width="3" fill="none"/>
+          <path d="M40 20 C44 23 47 27 47 32 C47 37 44 41 40 44" stroke="#3B82F6" stroke-width="3" fill="none"/>
+        </svg>
+      </button>
+    </div>
+    
+  ` : ''}
+  ${q.prompt}
+</h2>
+
+      <div class="mt-6" style="display:flex;flex-direction:column;gap:.75rem">
+        ${q.options.map((opt,i)=>`<button class="choice ${selected===i?'sel':''}" onclick="select(${i})"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${opt}</span></button>`).join('')}
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-secondary" ${state.index===0?'disabled':''} onclick="prev()">← ${t('test.prev')}</button>
+      <button class="btn-primary" ${selected===undefined?'disabled':''} onclick="next()">${state.index+1===total?t('test.finish'):t('test.next')} →</button>
+    </div>`;
+  updateTimer();
+}
+
+function select(i){ const q=QUESTIONS[state.index]; state.answers[q.id]=i; renderQ(); }
+function prev(){
+    if(currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+
+    if(state.index > 0){
+        state.index--;
+        renderQ();
+    }
+}
+function next(){
+    // أوقف الصوت قبل الانتقال
+    if(currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+
+    // لو فيه سؤال بعده → انتقل
+    if(state.index + 1 < QUESTIONS.length){
+        state.index++;
+        renderQ();
+    } 
+    // لو هذا آخر سؤال → اعرض النتيجة
+    else {
+        finish();
+    }
+}
+
+let currentAudio = null;
+
+function playAudio(src){
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  currentAudio = new Audio(src);
+  currentAudio.play().catch(err => {
+    console.log("Audio error:", err);
+  });
+}
+
+function finish(){ if(state.timer) clearInterval(state.timer); try{ sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state.answers)); }catch{} location.href='results.html'; }
+
+document.addEventListener('DOMContentLoaded', renderIntro);
+</script>
+<footer class="footer"><div class="footer-inner">
+  <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
+  <div class="stores" style="margin-top:0">
+  <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
+  <img src="../images/appleIcon.png" alt="Download on the App Store" style="height:50px">
+</a>
+  <div class="store store-disabled" aria-disabled="true">
+    <span style="font-size:1.5rem">▶</span>
+    <span class="store-lines"><span class="store-top" data-i18n="store.google.top"></span><span class="store-bot" data-i18n="store.google.soon"></span></span>
+  </div>
+</div>
+
+<div class="box">
+    <h3 style="font-size: 1.2rem; margin:0; padding:0; margin-left:5px;" data-i18n="footer.contact">
+    Contact Us
+</h3>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
+        <a href="https://wa.me/966508538283" target="_blank">
+            <img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;">
+        </a>
+
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
+            <img src="../images/TikTokIcon.png" style="width:30px; height:30px;">
+        </a>
+
+        <a href="https://t.me/Itqanenglish_sa" target="_blank">
+            <img src="../images/TelegramIcon.png" style="width:30px; height:30px;">
+        </a>
+    </div>
+</div>
+
+  <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
+</div>
+
+</footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+<script src="app.js"></script></body></html>

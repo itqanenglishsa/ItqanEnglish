@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 10px 20px 30px 20px; /* تقليل الحشو العلوي للتناسق */
+      background: #fff;
+      text-align: center;
+    }
+
+    @media (min-width: 481px) {
+      .auth-container {
+        border-radius: 12px;
+      }
+    }
+
+    /* 🟢 التحكم بالشعار داخل الـ div المستقل بسهولة من هنا 🟢 */
+    .logo-wrapper {
+      margin-top: 40px;     /* زيادة النسبة لتنزيل الشعار لأسفل كما تحب */
+      margin-bottom: 10px;  /* المسافة بين الشعار والعنوان */
+      text-align: center;
+    }
+
+    .auth-logo {
+      width: 180px;         /* التحكم في تكبير وتصغير حجم الشعار من هنا */
+      height: auto;
+      display: inline-block;
+    }
+
+    .auth-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #222;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 14px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #0078D4;
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 25px;
+      border: none;
+      background: #0078D4;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .auth-btn:hover {
+      background: #005fa3;
+    }
+
+    .auth-links {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .auth-links a {
+      color: #0078D4;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    .auth-links a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-social {
+      margin-top: 25px;
+    }
+
+    .social-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .social-btn:hover {
+      background: #f7f7f7;
+      border-color: #bbb;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="auth-container">
+    <div class="logo-wrapper">
+      <img src="../images/logo.png" class="auth-logo" alt="Logo">
+    </div>
+
+    <div id="dynamic-form"></div>
+  </div>
+
+<script>
+// دالة فحص الترجمة الآمنة لعدم حدوث اختفاء أو كراش
+function safeT(key, fallback) {
+  return (typeof t === "function") ? t(key) : fallback;
+}
+
+// دالة الإشعار المخصص الشفاف بإطار أزرق
+function showAlert(message) {
+  const existingAlert = document.getElementById("custom-alert");
+  if (existingAlert) existingAlert.remove();
+
+  const alertDiv = document.createElement("div");
+  alertDiv.id = "custom-alert";
+  
+  alertDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background-color: transparent;
+    color: #0078D4;
+    border: 2px solid #0078D4;
+    padding: 14px 24px;
+    border-radius: 25px;
+    box-shadow: 0 4px 15px rgba(0, 120, 212, 0.15);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+    z-index: 10000;
+    white-space: pre-line;
+    max-width: 90%;
+    width: max-content;
+    text-align: center;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+  `;
+
+  alertDiv.textContent = message;
+  document.body.appendChild(alertDiv);
+
+  setTimeout(() => {
+    alertDiv.style.transform = "translateX(-50%) translateY(0)";
+    alertDiv.style.opacity = "1";
+  }, 10);
+
+  setTimeout(() => {
+    alertDiv.style.transform = "translateX(-50%) translateY(-20px)";
+    alertDiv.style.opacity = "0";
+    setTimeout(() => alertDiv.remove(), 300);
+  }, 4000);
+}
+
+function validateEmail(email) {
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+)\.[a-zA-Z]{2,}$/;
+  if (!emailPattern.test(email)) return false;
+
+  const domain = email.split("@")[1].toLowerCase();
+  const validDomains = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "live.com", "proton.me", "mail.com"];
+  return validDomains.includes(domain);
+}
+
+function validatePassword(password) {
+  const passwordPattern = /^(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+  return passwordPattern.test(password);
+}
+
+// تعديل الدوال لتغير محتوى الحاوية الداخلية فقط بدون لمس الشعار الثابت وبدعم التكيف اللغوي
+function loadRegisterForm() {
+  if (typeof applyLang === "function") applyLang();
+
+  document.getElementById("dynamic-form").innerHTML = `
+    <h2 class="auth-title">${safeT("auth.createAccountTitle", "Create Account")}</h2>
+
+    <input type="email" id="reg-email" placeholder="${safeT("auth.emailPlace", "Email")}">
+    <input type="password" id="reg-password" placeholder="${safeT("auth.passwordPlace", "Password")}">
+    <input type="password" id="reg-confirm" placeholder="${safeT("auth.confirmPlace", "Confirm password")}">
+
+    <button class="auth-btn" id="register-btn">${safeT("auth.btnCreate", "Create account")}</button>
+
+    <div class="auth-links">
+      <a href="#" id="login-link">${safeT("auth.alreadyHave", "Already have an account?")}</a> |
+      <a href="#" id="forgot-link">${safeT("auth.forgotPass", "Forgot password?")}</a>
+    </div>
+
+    <div class="auth-social">
+      <button class="social-btn" id="google-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.49 3.77v3.12h4.01c2.34-2.16 3.69-5.32 3.69-8.74z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.01-3.12c-1.12.75-2.55 1.19-3.92 1.19-3.02 0-5.57-2.04-6.48-4.79H1.31v3.23A12 12 0 0 0 12 24z"/>
+          <path fill="#FBBC05" d="M5.52 14.37A7.17 7.17 0 0 1 5.12 12c0-.82.14-1.62.4-2.37V6.4H1.31A11.94 11.94 0 0 0 0 12c0 2.12.55 4.12 1.52 5.87l4-3.5z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.93 11.93 0 0 0 12 0 12 12 0 0 0 1.31 6.4l4.21 3.23c.91-2.75 3.46-4.88 6.48-4.88z"/>
+        </svg>
+        ${safeT("auth.googleSign", "Sign in with Google")}
+      </button>
+      <button class="social-btn" id="apple-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39z"/>
+        </svg>
+        ${safeT("auth.appleSign", "Sign in with Apple")}
+      </button>
+    </div>
+  `;
+
+  attachRegisterEvents();
+}
+
+function loadLoginForm() {
+  if (typeof applyLang === "function") applyLang();
+
+  document.getElementById("dynamic-form").innerHTML = `
+    <h2 class="auth-title">${safeT("auth.loginTitle", "Login")}</h2>
+
+    <input type="email" id="login-email" placeholder="${safeT("auth.emailPlace", "Email")}">
+    <input type="password" id="login-password" placeholder="${safeT("auth.passwordPlace", "Password")}">
+
+    <button class="auth-btn" id="login-btn">${safeT("auth.btnLogin", "Login")}</button>
+
+    <div class="auth-links">
+      <a href="#" id="back-register">${safeT("auth.btnCreate", "Create account")}</a> |
+      <a href="#" id="forgot-link">${safeT("auth.forgotPass", "Forgot password?")}</a>
+    </div>
+  `;
+
+  attachLoginEvents();
+}
+
+function loadForgotForm() {
+  if (typeof applyLang === "function") applyLang();
+
+  document.getElementById("dynamic-form").innerHTML = `
+    <h2 class="auth-title">${safeT("auth.resetTitle", "Reset Password")}</h2>
+
+    <input type="email" id="forgot-email" placeholder="${safeT("auth.enterEmailPlace", "Enter your email")}">
+
+    <button class="auth-btn" id="reset-btn">${safeT("auth.btnReset", "Send reset link")}</button>
+
+    <div class="auth-links">
+      <a href="#" id="back-register">${safeT("auth.backToReg", "Back to registration")}</a>
+    </div>
+  `;
+
+  attachForgotEvents();
+}
+
+function attachRegisterEvents() {
+  document.getElementById("register-btn").onclick = () => {
+    const email = document.getElementById("reg-email").value.trim();
+    const pass = document.getElementById("reg-password").value.trim();
+    const confirm = document.getElementById("reg-confirm").value.trim();
+
+    let errors = [];
+
+    if (!email) errors.push(safeT("auth.errEmailEmpty", "Please enter your email address."));
+    if (!pass) errors.push(safeT("auth.errPassEmpty", "Please enter your password."));
+
+    if (email && !validateEmail(email)) {
+      errors.push(safeT("auth.errEmailInvalid", "Enter a valid email address."));
+    }
+
+    if (pass && !validatePassword(pass)) {
+      errors.push(safeT("auth.errPassRequirements", "Password must include:\n  • 8+ characters\n  • 1 uppercase letter\n  • 1 symbol"));
+    }
+
+    if (email && pass && errors.length === 0) {
+      if (!confirm) {
+        errors.push(safeT("auth.errConfirmEmpty", "Please confirm your password."));
+      } else if (pass !== confirm) {
+        errors.push(safeT("auth.errMismatch", "Passwords do not match. Please ensure both fields are identical."));
+      }
+    }
+
+    if (errors.length > 0) {
+      showAlert(errors.map(err => "• " + err).join("\n"));
+      return;
+    }
+
+    showAlert(safeT("auth.successCreate", "Your account has been created successfully. Welcome!"));
+  };
+
+  document.getElementById("login-link").onclick = () => loadLoginForm();
+  document.getElementById("forgot-link").onclick = () => loadForgotForm();
+
+  document.getElementById("google-btn").onclick = () => showAlert(safeT("auth.clickGoogle", "Google login clicked"));
+  document.getElementById("apple-btn").onclick = () => showAlert(safeT("auth.clickApple", "Apple login clicked"));
+}
+
+function attachLoginEvents() {
+  document.getElementById("login-btn").onclick = () => {
+    const email = document.getElementById("login-email").value.trim();
+    const pass = document.getElementById("login-password").value.trim();
+
+    let errors = [];
+
+    if (!email) errors.push(safeT("auth.errEmailEmpty", "Please enter your email address."));
+    if (!pass) errors.push(safeT("auth.errPassEmpty", "Please enter your password."));
+
+    if (email && !validateEmail(email)) {
+      errors.push(safeT("auth.errEmailInvalid", "Enter a valid email address."));
+    }
+
+    if (errors.length > 0) {
+      showAlert(errors.map(err => "• " + err).join("\n"));
+      return;
+    }
+
+    showAlert(safeT("auth.successLogin", "Logged in successfully."));
+  };
+
+  document.getElementById("back-register").onclick = () => loadRegisterForm();
+  document.getElementById("forgot-link").onclick = () => loadForgotForm();
+}
+
+function attachForgotEvents() {
+  document.getElementById("reset-btn").onclick = () => {
+    const email = document.getElementById("forgot-email").value.trim();
+
+    if (!email) {
+      showAlert(safeT("auth.errEmailEmpty", "Please enter your email address."));
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      showAlert(safeT("auth.errEmailInvalid", "Enter a valid email address."));
+      return;
+    }
+
+    showAlert(safeT("auth.successReset", "A reset link has been sent to your email."));
+  };
+
+  document.getElementById("back-register").onclick = () => loadRegisterForm();
+}
+
+loadRegisterForm();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>About — Itqan English</title>
+<meta name="description" content="Arabic-first English learning platform for Arab learners worldwide."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet"/>
+</head><body>
+<header class="header">
+  <div class="header-inner">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="Logo" style="height:40px">
+  </a>
+
+  <a href="#" id="auth-trigger-icon" class="user-icon-link">
+    <img src="../images/UserIcon.png" alt="User" style="height:35px; width:35px; object-fit:contain;">
+  </a>
+
+  <nav class="nav">
+    <div class="menu-wrap">
+      <button id="menu-trigger" class="pill" aria-haspopup="true">
+        ☰ <span data-i18n="nav.menu">القائمة</span>
+      </button>
+
+      <div id="menu-panel" class="menu-panel">
+        <a href="../index.html" data-i18n="nav.home">الرئيسية</a>
+        <a href="courses.html" data-i18n="nav.courses">الدورات</a>
+        <a href="about.html" data-i18n="nav.about">عن المنصة</a>
+      </div>
+    </div>
+
+    <button class="pill" onclick="setLang(getLang()==='en'?'ar':'en')">
+        🌐
+      <span data-i18n="lang.toggle" style="display:none;">English</span>
+    </button>
+  </nav>
+</div>
+
+<div id="auth-modal-overlay" class="pop-modal-overlay">
+  <div class="pop-modal-content-box">
+    <button id="close-modal-btn" class="pop-close-modal-x">&times;</button>
+    
+    <div class="pop-logo-wrapper">
+      <img src="../images/logo.png" class="pop-auth-logo" alt="Logo">
+    </div>
+    
+    <div id="pop-dynamic-form"></div>
+  </div>
+</div>
+</header>
+<main class="container-narrow" style="padding-top:5rem;padding-bottom:5rem">
+  <span class="text-xs font-semibold text-primary" style="text-transform:uppercase;letter-spacing:.15em" data-i18n="about.kicker"></span>
+  <h1 class="h1 mt-3" style="font-size:3rem" data-i18n="about.title"></h1>
+  <p class="lead" style="max-width:none" data-i18n="about.intro"></p>
+  <!-- باقي محتوى الصفحة هنا -->
+  <div class="grid grid-2 mt-12">
+    <div class="card"><h2 class="text-lg font-semibold" data-i18n="about.mission.t"></h2><p class="muted text-sm mt-2" data-i18n="about.mission.d"></p></div>
+    <div class="card" style="background:var(--peach)"><h2 class="text-lg font-semibold" data-i18n="about.vision.t"></h2><p class="text-sm mt-2" data-i18n="about.vision.d"></p></div>
+  </div>
+  
+  <!-- هذا هو السطر المعدل ليصبح الزر في المنتصف تماماً -->
+  <div class="mt-12" style="text-align: center;">
+    <a href="test.html" class="cta cta-lg"><span data-i18n="about.cta">ابدأ اختبار تحديد المستوى</span> →</a>
+  </div>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
+  <div class="stores" style="margin-top:0">
+  <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
+  <img src="../images/appleIcon.png" alt="Download on the App Store" style="height:50px">
+</a>
+  <div class="store store-disabled" aria-disabled="true">
+    <span style="font-size:1.5rem">▶</span>
+    <span class="store-lines"><span class="store-top" data-i18n="store.google.top"></span><span class="store-bot" data-i18n="store.google.soon"></span></span>
+  </div>
+</div>
+
+<div class="box">
+    <h3 style="font-size: 1.2rem; margin:0; padding:0; margin-left:5px;" data-i18n="footer.contact">
+    Contact Us
+</h3>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
+        <a href="https://wa.me/966508538283" target="_blank">
+            <img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;">
+        </a>
+
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
+            <img src="../images/TikTokIcon.png" style="width:30px; height:30px;">
+        </a>
+
+        <a href="https://t.me/Itqanenglish_sa" target="_blank">
+            <img src="../images/TelegramIcon.png" style="width:30px; height:30px;">
+        </a>
+    </div>
+</div>
+
+  <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
+</div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+<script src="app.js"></script></body></html>

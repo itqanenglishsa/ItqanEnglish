@@ -1,0 +1,137 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Your CEFR Result — Itqan English</title>
+<meta name="description" content="Your placement test result."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet"/>
+</head><body>
+
+<header class="header">
+  <div class="header-inner">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="Logo" style="height:40px">
+  </a>
+
+  <a href="#" id="auth-trigger-icon" class="user-icon-link">
+    <img src="../images/UserIcon.png" alt="User" style="height:35px; width:35px; object-fit:contain;">
+  </a>
+
+  <nav class="nav">
+    <div class="menu-wrap">
+      <button id="menu-trigger" class="pill" aria-haspopup="true">
+        ☰ <span data-i18n="nav.menu">القائمة</span>
+      </button>
+
+      <div id="menu-panel" class="menu-panel">
+        <a href="../index.html" data-i18n="nav.home">الرئيسية</a>
+        <a href="courses.html" data-i18n="nav.courses">الدورات</a>
+        <a href="about.html" data-i18n="nav.about">عن المنصة</a>
+      </div>
+    </div>
+
+    <button class="pill" onclick="setLang(getLang()==='en'?'ar':'en')">
+        🌐
+      <span data-i18n="lang.toggle" style="display:none;">English</span>
+    </button>
+  </nav>
+</div>
+
+<div id="auth-modal-overlay" class="pop-modal-overlay">
+  <div class="pop-modal-content-box">
+    <button id="close-modal-btn" class="pop-close-modal-x">&times;</button>
+    
+    <div class="pop-logo-wrapper">
+      <img src="../images/logo.png" class="pop-auth-logo" alt="Logo">
+    </div>
+    
+    <div id="pop-dynamic-form"></div>
+  </div>
+</div>
+</header>
+
+<main id="results-root" class="container-narrow" style="padding:3rem 1.5rem"></main>
+<script>
+const STORAGE_KEY = "itqan_test_answers";
+function render(){
+  const raw = sessionStorage.getItem(STORAGE_KEY);
+  if(!raw){ location.href='test.html'; return; }
+  let data;
+  try { data = calculateLevel(JSON.parse(raw)); } catch { location.href='test.html'; return; }
+  const lang = getLang();
+  const desc = LEVEL_DESCRIPTIONS[data.level];
+  const pct = Math.round((data.score/data.total)*100);
+  const sections = Object.entries(data.perSection)
+  .filter(([k]) => k !== "levels")
+  .map(([k,v])=>{
+    const p = v.total ? Math.round((v.correct/v.total)*100) : 0;
+    return `<div class="card"><p class="text-sm muted font-medium">${t('section.'+k)}</p><p class="text-2xl font-bold mt-2">${data.perSectionLevel[k]}</p><p class="text-xs muted mt-2">${t('results.correctOf',{c:v.correct,t:v.total})}</p><div class="bar-track mt-3"><div class="bar-fill" style="width:${p}%;background:var(--gradient-hero)"></div></div></div>`;
+  }).join('');
+  const levelsHtml = ['A1','A2','B1','B2'].map(lvl=>{
+    const v = data.perLevel[lvl]; const p = v.total ? Math.round((v.correct/v.total)*100) : 0;
+    const cur = lvl === data.level;
+    return `<div class="flex items-center gap-4"><div style="width:2.5rem;flex-shrink:0;font-weight:700;font-size:.875rem;color:${cur?'var(--primary)':'var(--muted-foreground)'}">${lvl}</div><div style="flex:1"><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${cur?'var(--gradient-hero)':'var(--primary-soft)'}"></div></div></div><div class="muted text-sm" style="width:5rem;text-align:end;font-variant-numeric:tabular-nums">${v.correct}/${v.total}</div></div>`;
+  }).join('');
+  document.getElementById('results-root').innerHTML = `
+    <div class="card card-lg" style="overflow:hidden;padding:0;box-shadow:var(--shadow-elegant)">
+      <div class="result-hero">
+        <div style="margin:0 auto;width:56px;height:56px;border-radius:1rem;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);display:grid;place-items:center;font-size:1.5rem">🏆</div>
+        <p class="mt-5 text-sm" style="text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.8)">${t('results.your')}</p>
+        <p class="result-num">${data.level}</p>
+        <p class="text-2xl font-semibold mt-2">${desc.title[lang]}</p>
+        <p style="margin:1rem auto 0;max-width:36rem;color:rgba(255,255,255,.9)">${desc.desc[lang]}</p>
+      </div>
+      <div class="stat-row">
+        <div class="text-center"><p class="stat-label">${t('results.score')}</p><p class="stat-value">${data.score} / ${data.total}</p></div>
+        <div class="text-center"><p class="stat-label">${t('results.accuracy')}</p><p class="stat-value">${pct}%</p></div>
+        <div class="text-center"><p class="stat-label">${t('results.level')}</p><p class="stat-value">${data.level}</p></div>
+      </div>
+    </div>
+    <section class="mt-10"><h2 class="text-xl font-semibold">${t('results.bySkill')}</h2><div class="grid grid-3 mt-4">${sections}</div></section>
+    <section class="mt-10"><h2 class="text-xl font-semibold">${t('results.byLevel')}</h2><div class="card mt-4" style="padding:1.5rem"><div style="display:flex;flex-direction:column;gap:1rem">${levelsHtml}</div></div></section>
+        <div class="results-buttons mt-10 flex items-center justify-center gap-4" style="flex-wrap:wrap">
+      <button class="btn-secondary" onclick="sessionStorage.removeItem(STORAGE_KEY);location.href='test.html'">↻ ${t('results.retake')}</button>
+      <a href="courses.html" class="cta" data-i18n="results.viewCourses"></a>
+    </div>`;
+}
+document.addEventListener('DOMContentLoaded', render);
+</script>
+<footer class="footer"><div class="footer-inner">
+  <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
+  <div class="stores" style="margin-top:0">
+  <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
+  <img src="../images/appleIcon.png" alt="Download on the App Store" style="height:50px">
+</a>
+  <div class="store store-disabled" aria-disabled="true">
+    <span style="font-size:1.5rem">▶</span>
+    <span class="store-lines"><span class="store-top" data-i18n="store.google.top"></span><span class="store-bot" data-i18n="store.google.soon"></span></span>
+  </div>
+</div>
+
+<div class="box">
+    <h3 style="font-size: 1.2rem; margin:0; padding:0; margin-left:5px;" data-i18n="footer.contact">
+    Contact Us
+</h3>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
+        <a href="https://wa.me/966508538283" target="_blank">
+            <img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;">
+        </a>
+
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
+            <img src="../images/TikTokIcon.png" style="width:30px; height:30px;">
+        </a>
+
+        <a href="https://t.me/Itqanenglish_sa" target="_blank">
+            <img src="../images/TelegramIcon.png" style="width:30px; height:30px;">
+        </a>
+    </div>
+</div>
+
+  <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
+</div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+<script src="app.js"></script></body></html>

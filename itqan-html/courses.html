@@ -1,0 +1,424 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Courses — Itqan English</title>
+<meta name="description" content="Browse Itqan English digital courses across all CEFR levels."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="styles.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet"/>
+</head><body>
+
+<header class="header">
+ <div class="header-inner">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="Logo" style="height:40px">
+  </a>
+
+  <a href="#" id="auth-trigger-icon" class="user-icon-link">
+    <img src="../images/UserIcon.png" alt="User" style="height:35px; width:35px; object-fit:contain;">
+  </a>
+
+  <nav class="nav">
+    <div class="menu-wrap">
+      <button id="menu-trigger" class="pill" aria-haspopup="true">
+        ☰ <span data-i18n="nav.menu">القائمة</span>
+      </button>
+
+      <div id="menu-panel" class="menu-panel">
+        <a href="../index.html" data-i18n="nav.home">الرئيسية</a>
+        <a href="courses.html" data-i18n="nav.courses">الدورات</a>
+        <a href="about.html" data-i18n="nav.about">عن المنصة</a>
+      </div>
+    </div>
+
+    <button class="pill" onclick="setLang(getLang()==='en'?'ar':'en')">
+        🌐
+      <span data-i18n="lang.toggle" style="display:none;">English</span>
+    </button>
+  </nav>
+</div>
+
+<div id="auth-modal-overlay" class="pop-modal-overlay">
+  <div class="pop-modal-content-box">
+    <button id="close-modal-btn" class="pop-close-modal-x">&times;</button>
+    
+    <div class="pop-logo-wrapper">
+      <img src="../images/logo.png" class="pop-auth-logo" alt="Logo">
+    </div>
+    
+    <div id="pop-dynamic-form"></div>
+  </div>
+</div>
+</header>
+
+<section class="hero" style="border-bottom:1px solid color-mix(in oklch,var(--border) 60%,transparent)">
+  <div class="hero-bg"></div>
+  <div class="container text-center" style="padding:5rem 1.5rem">
+    <span class="badge">✨ <span data-i18n="courses.kicker"></span></span>
+    <h1 class="h1 mt-5" data-i18n="courses.title"></h1>
+    <p class="lead" style="margin:1.25rem auto 0;max-width:36rem" data-i18n="courses.subtitle"></p>
+  </div>
+</section>
+<main class="container" style="padding:4rem 1.5rem">
+  <div class="flex items-center gap-2 mb-6"><span style="color:var(--primary)">★</span><h2 class="text-2xl font-bold" data-i18n="courses.featured"></h2></div>
+  <div id="featured" class="grid grid-2"></div>
+
+    <div id="skills-container">
+
+    <div class="skill-block" data-skill="Foundation">
+      <h2 class="skill-title">
+        <img src="../images/FoundationIcon.png" class="skill-main-icon">
+        <span data-i18n="section.Foundation"></span>
+      </h2>
+
+      <div class="skill-filters" id="foundation-filters"></div>
+      <div class="skill-grid" id="foundation-grid"></div>
+
+      
+    </div>
+
+  <div class="card card-lg text-center" style="margin-top:5rem;padding:2.5rem">
+
+    <h3 class="h2" data-i18n="courses.cta.title"></h3>
+    <p class="muted mt-3" style="max-width:28rem;margin-left:auto;margin-right:auto" data-i18n="courses.cta.desc"></p>
+    <a href="test.html" class="cta cta-lg mt-6"><span data-i18n="courses.cta.button"></span> →</a>
+  </div>
+</main>
+
+<div id="foundation-modal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-overlay" id="foundation-modal-overlay"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="foundation-modal-title">
+    <div class="modal-body">
+      <!-- foundation content is rendered dynamically based on language -->
+    </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
+        <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+const SKILL_COURSES = {
+  Foundation: {
+    All: [
+      { key: "foundation", level: "Free", title: "Foundation Course", price: 59 }
+    ],
+    Free: [
+      { key: "foundation", level: "Free", title: "Foundation Course", price: 59 }
+    ]
+  }
+};
+
+function renderCourses(){
+  const lang = getLang();
+
+  // 1) نفس جزء الـ featured القديم (ما غيرناه)
+
+  const featuredContainer = document.getElementById("featured");
+
+
+  // 🔹 إعادة بناء قسم Featured courses
+featuredContainer.innerHTML = COURSES
+  .filter(c => c.featured)
+  .map(c => renderCourseCard(c, lang, false))
+  .join('');
+
+  
+  const LEVELS = {
+    Foundation: ["All", "Free"]
+  };
+  const SKILLS = ["Foundation"];
+
+  // 2) نبني الفلاتر لكل مهارة (أيقونات فقط)
+  SKILLS.forEach(skill => {
+    document.getElementById(`${skill.toLowerCase()}-filters`).innerHTML =
+  LEVELS[skill].map(level => {
+
+  let label = level;
+
+  if(level === "All"){
+    label = t("filter.all");
+  }
+  else if(level === "Free"){
+    label = t("filter.free");
+  }
+  else if(level.startsWith("+")){
+  const num = level.replace("+","");
+
+  label = getLang() === "ar"
+    ? "+" + num.replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d])
+    : level;
+}
+
+  return `
+    <button class="filter-btn"
+      onclick="setActiveFilter(this, '${skill}', '${level}')">
+      ${label}
+    </button>
+  `;
+}).join('');
+
+    // أول ما تفتح الصفحة: نعرض All لكل مهارة
+    renderSkill(skill, "All");
+  });
+}
+
+
+function setActiveFilter(btn, skill, level){
+  // إزالة التفعيل من كل الأزرار داخل نفس المهارة
+  document.querySelectorAll(`#${skill.toLowerCase()}-filters .filter-btn`)
+    .forEach(b => b.classList.remove('active-filter'));
+
+  // تفعيل الزر الحالي
+  btn.classList.add('active-filter');
+
+  // عرض الكورسات
+  renderSkill(skill, level);
+}
+
+function formatNumber(num){
+  const lang = getLang();
+
+  // تحويل النص إلى رقم لو أمكن
+  const n = Number(num);
+
+  // لو ما قدر يتحول (مثل Free) نرجعه كما هو
+  if (isNaN(n)) return num;
+
+  return lang === "ar"
+    ? n.toLocaleString("ar-EG")
+    : n.toLocaleString("en-US");
+}
+
+function renderSkill(skill, level){
+  const courses = SKILL_COURSES[skill][level];
+
+    const courseCards = courses.map((c) => `
+    <article class="card" style="display:flex;flex-direction:column">
+
+      <div class="flex items-center gap-2">
+        <span class="lvl-pill lvl-pill-sm">
+          ${
+  c.level === "Free"
+    ? (getLang() === "ar" ? "A1" : "A1")
+    : c.level.startsWith("+")
+      ? "+" + formatNumber(c.level.replace("+",""))
+      : c.level
+}
+        </span>
+      </div>
+
+      <h3 class="text-lg font-semibold mt-3">
+  ${t(`skill.${c.key}.title`) !== `skill.${c.key}.title`
+      ? t(`skill.${c.key}.title`)
+      : c.title}
+</h3>
+
+      <p class="muted text-sm mt-2">
+  ${t(`skill.${c.key}.desc`) !== `skill.${c.key}.desc`
+      ? t(`skill.${c.key}.desc`)
+      : "A fun and interactive journey to learn English from scratch with clear, simple steps for everyone."}
+</p>
+
+      <div class="mt-4 flex items-center gap-4 muted text-xs">
+        <span>
+📖 ${
+  t(`skill.${c.key}.lessons`) !== `skill.${c.key}.lessons`
+    ? t(`skill.${c.key}.lessons`)
+    : "6 Units"
+}
+</span>
+      </div>
+
+      <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
+        <span class="font-bold">
+  ${
+  c.price === "Free"
+    ? (getLang() === "ar" ? "مجاني" : "Free")
+        : `<img src="../images/SARIcon.png" alt="SAR" class="currency-icon"> ${formatNumber(c.price)}`
+}
+</span>
+             <a href="#" class="text-primary text-sm font-semibold course-details-trigger" data-course-key="${c.key}">
+  ${t("courses.details")} →
+</a>
+      </div>
+
+    </article>
+  `).join('');
+
+  document.getElementById(`${skill.toLowerCase()}-grid`).innerHTML = courseCards;
+}
+
+
+
+
+
+
+
+
+function getFoundationModalContent(lang){
+  if(lang === 'ar'){
+    return `
+      <h2 id="foundation-modal-title">أولاً: عن الدورة (في سطور)</h2>
+      <p>انطلق في رحلة التحدث بالإنجليزية بثقة.. من الصفر وحتى التأسيس المتين!
+      التجربة التعليمية الأكثر تفاعلية على الإطلاق لتأسيس لغتك الإنجليزية (Level A1). هنا</p>
+
+      <h3>ثانيًا: محتوى الدورة (ماذا ستتعلم؟)</h3>
+      <div class="modal-list">
+        <p>الوحدة 1 | الحروف والأصوات: نطق الحروف، التمييز بين أصواتها، والحروف الصامتة والمركبة.</p>
+        <p>الوحدة 2 | فعل الكينونة (Verb to Be): وصف الأشخاص والأشياء، وصياغة الإثبات والنفي والسؤال.</p>
+        <p>الوحدة 3 | أقسام الكلام: معرفة الأسماء، الأفعال، الصفات، وحروف الجر وكيف تعمل معاً.</p>
+        <p>الوحدة 4 | بناء الجملة والأدوات: تركيب جملة صحيحة (فاعل + فعل + مفعول) واستخدام (A, An, The).</p>
+        <p>الوحدة 5 | المضارع البسيط: التعبير عن روتينك اليومي، وعاداتك، وصياغة الأسئلة باستخدام (Do/Does).</p>
+        <p>الوحدة 6 | مفردات ومحادثات: التحيات، الأرقام، أفراد العائلة، والتدرب على محادثات واقعية للتعريف بالنفس.</p>
+      </div>
+
+      <h3>ثالثًا: الميزات التفاعلية (سر تميّز الدورة)</h3>
+      <div class="modal-list">
+        <p>نظام صوتي تفاعلي: لا تخمن النطق بعد اليوم! كل كلمة وجملة مدعومة بأزرار صوتية فورية لتسمع النطق الصحيح وتكرره.</p>
+        <p>تمارين تطبيقية مستمرة: بعد كل قاعدة ومفردة، ستجد تمارين تفاعلية فورية (سحب وإفلات، إعادة ترتيب، واختيارات) لتتأكد من فهمك في نفس اللحظة.</p>
+        <p>اختبار نهائي شامل: في نهاية الدورة، ستخوض اختباراً ذكياً يقيس بدقة مدى استيعابك لكل ما درست ويؤكد جاهزيتك للانتقال للمستوى التالي.</p>
+        <p>شهادة إتمام: بمجرد اجتيازك للاختبار النهائي، ستحصل فوراً على شهادة إثبات كفاءة تتوج بها جهودك وتدعم بها ملفك الشخصي.</p>
+      </div>
+    `;
+  }
+
+  return `
+      <h2 id="foundation-modal-title">First: About the course (in brief)</h2>
+      <p>Start your journey to speaking English with confidence... from zero to a strong and solid foundation! The most interactive learning experience ever to build your English language foundation (Level A1). Here</p>
+
+      <h3>Second: Course content (what will you learn?)</h3>
+      <div class="modal-list">
+        <p>Unit 1 | Letters and sounds: letter pronunciation, distinguishing their sounds, and consonant and digraph letters.</p>
+        <p>Unit 2 | The verb to be: describing people and things, forming affirmatives, negatives, and questions.</p>
+        <p>Unit 3 | Parts of speech: learning nouns, verbs, adjectives, and prepositions and how they work together.</p>
+        <p>Unit 4 | Sentence building and articles: constructing a correct sentence (subject + verb + object) and using (A, An, The).</p>
+        <p>Unit 5 | Simple present: talking about your daily routine, habits, and forming questions with (Do/Does).</p>
+        <p>Unit 6 | Vocabulary and conversations: greetings, numbers, family members, and practicing real conversations for introducing yourself.</p>
+      </div>
+
+      <h3>Third: Interactive features (the course’s secret advantage)</h3>
+      <div class="modal-list">
+        <p>Interactive voice system: don’t guess pronunciation anymore! Every word and sentence is supported by instant audio buttons so you can hear the correct pronunciation and repeat it.</p>
+        <p>Continuing practice exercises: after every rule and vocabulary item, you’ll find instant interactive exercises (drag and drop, reorder, and multiple-choice) to check your understanding right away.</p>
+        <p>Comprehensive final test: at the end of the course, you’ll take a smart test that accurately measures what you’ve learned and confirms you’re ready for the next level.</p>
+        <p>Completion certificate: once you pass the final test, you’ll immediately receive a certificate proving your competency and supporting your profile.</p>
+      </div>
+    `;
+}
+
+function renderFoundationModal(){
+  const lang = getLang();
+  const modalBody = document.querySelector('#foundation-modal .modal-body');
+  const actions = document.querySelector('#foundation-modal .modal-actions');
+  if(modalBody){
+    modalBody.innerHTML = getFoundationModalContent(lang);
+  }
+  if(actions){
+    actions.innerHTML = `
+      <button type="button" class="btn-secondary modal-close-btn">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
+      <button type="button" class="cta modal-primary-btn" onclick="goToSalla('foundation')">
+  ${lang === 'ar' ? 'سجّل الآن' : 'Register Now'}
+</button>
+
+    `;
+  }
+}
+
+function openFoundationModal(event){
+  if(event) event.preventDefault();
+  const modal = document.getElementById('foundation-modal');
+  if(!modal) return;
+  renderFoundationModal();
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFoundationModal(){
+  const modal = document.getElementById('foundation-modal');
+  if(!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('click', function(event){
+  const trigger = event.target.closest('.course-details-trigger');
+  if(trigger){
+    event.preventDefault();
+    openFoundationModal();
+    return;
+  }
+  if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
+    closeFoundationModal();
+  }
+});
+
+document.addEventListener('keydown', function(event){
+  if(event.key === 'Escape'){
+    closeFoundationModal();
+  }
+});
+
+
+</script>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
+  <div class="stores" style="margin-top:0">
+  <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
+  <img src="../images/appleIcon.png" alt="Download on the App Store" style="height:50px">
+</a>
+  <div class="store store-disabled" aria-disabled="true">
+    <span style="font-size:1.5rem">▶</span>
+    <span class="store-lines"><span class="store-top" data-i18n="store.google.top"></span><span class="store-bot" data-i18n="store.google.soon"></span></span>
+  </div>
+</div>
+
+<div class="box">
+    <h3 style="font-size: 1.2rem; margin:0; padding:0; margin-left:5px;" data-i18n="footer.contact">
+    Contact Us
+</h3>
+
+    <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
+        <a href="https://wa.me/966508538283" target="_blank">
+            <img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;">
+        </a>
+
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
+            <img src="../images/TikTokIcon.png" style="width:30px; height:30px;">
+        </a>
+
+        <a href="https://t.me/Itqanenglish_sa" target="_blank">
+            <img src="../images/TelegramIcon.png" style="width:30px; height:30px;">
+        </a>
+    </div>
+</div>
+
+  <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
+</div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+<script src="app.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    renderCourses();
+  });
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    applyLang();
+  });
+</script>
+
+</body></html>
