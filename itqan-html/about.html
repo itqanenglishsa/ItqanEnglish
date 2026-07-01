@@ -51,17 +51,17 @@
   </div>
 </div>
 </header>
+
 <main class="container-narrow" style="padding-top:5rem;padding-bottom:5rem">
   <span class="text-xs font-semibold text-primary" style="text-transform:uppercase;letter-spacing:.15em" data-i18n="about.kicker"></span>
   <h1 class="h1 mt-3" style="font-size:3rem" data-i18n="about.title"></h1>
   <p class="lead" style="max-width:none" data-i18n="about.intro"></p>
-  <!-- باقي محتوى الصفحة هنا -->
+
   <div class="grid grid-2 mt-12">
     <div class="card"><h2 class="text-lg font-semibold" data-i18n="about.mission.t"></h2><p class="muted text-sm mt-2" data-i18n="about.mission.d"></p></div>
     <div class="card" style="background:var(--peach)"><h2 class="text-lg font-semibold" data-i18n="about.vision.t"></h2><p class="text-sm mt-2" data-i18n="about.vision.d"></p></div>
   </div>
   
-  <!-- هذا هو السطر المعدل ليصبح الزر في المنتصف تماماً -->
   <div class="mt-12" style="text-align: center;">
     <a href="test.html" class="cta cta-lg"><span data-i18n="about.cta">ابدأ اختبار تحديد المستوى</span> →</a>
   </div>
@@ -101,5 +101,66 @@
 
   <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
 </div></footer>
+
 <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
-<script src="app.js"></script></body></html>
+
+<!-- ⭐ تعريف Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = supabase;
+
+  const supabaseUrl = "https://jacylpaxxgubvhofpuup.supabase.co";
+  const supabaseAnonKey = "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai";
+
+  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+</script>
+
+<!-- ⭐ كود التسجيل + Google -->
+<script>
+// فتح نافذة التسجيل
+document.getElementById("auth-trigger-icon").onclick = () => {
+  document.getElementById("auth-modal-overlay").style.display = "flex";
+  loadRegisterForm();
+};
+
+// إغلاق النافذة
+document.getElementById("close-modal-btn").onclick = () => {
+  document.getElementById("auth-modal-overlay").style.display = "none";
+};
+
+// تحميل نموذج التسجيل
+function loadRegisterForm() {
+  document.getElementById("pop-dynamic-form").innerHTML = `
+    <button id="google-btn" class="cta cta-lg" style="width:100%;margin-top:1rem;">
+      تسجيل الدخول عبر Google
+    </button>
+  `;
+
+  // زر Google
+  document.getElementById("google-btn").onclick = async () => {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "https://itqanenglishsa.vercel.app/profile.html"
+      }
+    });
+
+    if (error) {
+      console.error(error);
+      alert("حدث خطأ أثناء تسجيل الدخول");
+    }
+  };
+}
+
+// التحويل للبروفايل بعد تسجيل الدخول
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (session && session.user) {
+    const email = session.user.email;
+    localStorage.setItem("userEmail", email);
+    window.location.href = "profile.html";
+  }
+});
+</script>
+
+<script src="app.js"></script>
+</body></html>
