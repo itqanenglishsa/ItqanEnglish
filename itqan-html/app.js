@@ -974,24 +974,31 @@ function popLoadRegisterForm() {
   if (!container) return;
   container.innerHTML = `
     <h2 class="auth-title">${popGetText("createAccountTitle")}</h2>
-    <input type="email" id="login-email" placeholder="${popGetText("emailPlace")}">
-    <input type="password" id="login-password" placeholder="${popGetText("passwordPlace")}">
-    <button class="auth-btn" id="login-btn" style="width: 100%; padding: 14px; margin-top: 10px; border-radius: 25px; border: none; background: #0078D4; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;">${popGetText("btnLogin")}</button>
+    <input type="email" id="reg-email" placeholder="${popGetText("emailPlace")}">
+    <input type="password" id="reg-password" placeholder="${popGetText("passwordPlace")}">
+    <input type="password" id="reg-confirm" placeholder="${popGetText("confirmPlace")}">
+    
+    <button class="auth-btn" id="register-btn" style="width: 100%; padding: 14px; margin-top: 10px; border-radius: 25px; border: none; background: #0078D4; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;">${popGetText("btnCreate")}</button>
+    
     <div class="auth-links" style="margin-top: 20px; font-size: 14px; color: #666;">
-      <a href="#" id="forgot-link" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("forgotPass")}</a>
+      <a href="#" id="login-link" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("alreadyHave")} ${popGetText("loginTitle")}</a>
     </div>
+    
     <div class="auth-social" style="margin-top: 25px;">
       <button class="social-btn" onclick="loginWithGoogleDirectly()" style="display: flex; align-items: center; justify-content: center; gap: 10px; width:100%; padding: 12px; border-radius: 25px; border: 1px solid #ccc; background: #fff; cursor: pointer;">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.49 3.77v3.12h4.01c2.34-2.16 3.69-5.32 3.69-8.74z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.01-3.12c-1.12.75-2.55 1.19-3.92 1.19-3.02 0-5.57-2.04-6.48-4.79H1.31v3.23A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.52 14.37A7.17 7.17 0 0 1 5.12 12c0-.82.14-1.62.4-2.37V6.4H1.31A11.94 11.94 0 0 0 0 12c0 2.12.55 4.12 1.52 5.87l4-3.5z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.93 11.93 0 0 0 12 0 12 12 0 0 0 1.31 6.4l4.21 3.23c.91-2.75 3.46-4.88 6.48-4.88z"/></svg>
         ${popGetText("googleSign")}
       </button>
     </div>`;
-  popAttachLoginEvents();
+  
+  popAttachRegisterEvents(); // تفعيل الأحداث الخاصة بالفورم الحالي بشكل صحيح 
 }
 
 
 function popLoadLoginForm() {
-  document.getElementById("pop-dynamic-form").innerHTML = `
+  const container = document.getElementById("pop-dynamic-form");
+  if (!container) return;
+  container.innerHTML = `
     <h2 class="auth-title">${popGetText("loginTitle")}</h2>
     <input type="email" id="login-email" placeholder="${popGetText("emailPlace")}">
     <input type="password" id="login-password" placeholder="${popGetText("passwordPlace")}">
@@ -1003,11 +1010,14 @@ function popLoadLoginForm() {
       <a href="#" id="forgot-link" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("forgotPass")}</a>
     </div>
   `;
-  popAttachLoginEvents();
+  
+  popAttachLoginEvents(); // تم تعديلها لتستدعي أحداث تسجيل الدخول
 }
 
 function popLoadForgotForm() {
-  document.getElementById("pop-dynamic-form").innerHTML = `
+  const container = document.getElementById("pop-dynamic-form");
+  if (!container) return;
+  container.innerHTML = `
     <h2 class="auth-title">${popGetText("resetTitle")}</h2>
     <input type="email" id="forgot-email" placeholder="${popGetText("enterEmailPlace")}">
     
@@ -1017,7 +1027,8 @@ function popLoadForgotForm() {
       <a href="#" id="back-register" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("backToReg")}</a>
     </div>
   `;
-  popAttachForgotEvents();
+  
+  popAttachForgotEvents(); // تم تعديلها لتستدعي أحداث استعادة كلمة المرور
 }
 
 // دالة فحص البريد الإلكتروني الصارم ومنع الفراغات وحصر النطاقات بالشركات الكبرى فقط
@@ -1045,24 +1056,24 @@ function popIsValidStrictEmail(email) {
 }
 
 function popAttachRegisterEvents() {
-  document.getElementById("register-btn").onclick = () => {
+  document.getElementById("register-btn").onclick = async () => {
     const email = document.getElementById("reg-email").value;
     const pass = document.getElementById("reg-password").value;
     const confirm = document.getElementById("reg-confirm").value;
     let errors = [];
 
-    // فحص البريد الإلكتروني
+    // 1. فحص البريد الإلكتروني
     if (!email.trim()) {
       errors.push(popGetText("errEmailEmpty"));
     } else if (!popIsValidStrictEmail(email)) {
       errors.push(popGetText("errEmailInvalid"));
     }
 
-    // فحص كلمة المرور الصارم ومنع المسافات داخلها
+    // 2. فحص كلمة المرور الصارم ومنع المسافات داخلها
     if (!pass) {
       errors.push(popGetText("errPassEmpty"));
     } else if (/\s/.test(pass)) {
-      errors.push(popGetText("errPassRequirements")); // حظر المسافات في كلمة المرور
+      errors.push(popGetText("errPassRequirements")); 
     } else {
       const hasLength = pass.length >= 8;
       const hasUpper = /[A-Z]/.test(pass);
@@ -1074,68 +1085,69 @@ function popAttachRegisterEvents() {
       }
     }
 
-    // فحص تطابق الحقول
+    // 3. فحص تطابق الحقول
     if (!confirm) {
       errors.push(popGetText("errConfirmEmpty"));
     } else if (pass !== confirm) {
       errors.push(popGetText("errMismatch"));
     }
     
+    // إذا وجدت أخطاء في المدخلات أوقف العملية واعرضها للمستخدم
     if (errors.length > 0) { 
       popShowAlert(errors.map(err => "• " + err).join("\n")); 
       return; 
     }
     
-    popShowAlert(popGetText("successCreate"));
+    // ==========================================
+    // ⚡ الربط الفعلي مع Supabase لإنشاء الحساب
+    // ==========================================
+    if (!window.supabaseClient) {
+      popShowAlert("عذراً، لم يتم تهيئة اتصال قاعدة البيانات بعد.");
+      return;
+    }
+
+    try {
+      // إرسال الطلب لـ Supabase
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email: email.trim(),
+        password: pass
+      });
+
+      if (error) {
+        // في حال وجود خطأ من سيرفر سوبابيز (مثلاً الحساب مسجل مسبقاً)
+        popShowAlert("خطأ: " + error.message);
+      } else {
+        // نجحت العملية!
+        popShowAlert(popGetText("successCreate"));
+        
+        // إذا كان نظام سوبابيز لا يتطلب تأكيد الإيميل، سيدخله فوراً للبروفايل
+        if (data.session) {
+          window.location.href = window.location.origin + "/itqan-html/profile.html";
+        } else {
+          // إذا كان يتطلب تأكيد الإيميل، سيظهر له تنبيه لتفقد بريده
+          popShowAlert("تم إنشاء الحساب! يرجى مراجعة بريدك الإلكتروني لتأكيده وتفعيله.");
+        }
+      }
+    } catch (err) {
+      console.error("Register Error:", err);
+      popShowAlert("حدث خطأ غير متوقع أثناء إنشاء الحساب.");
+    }
   };
 
+  // أزرار التنقل المعتادة
   document.getElementById("login-link").onclick = () => popLoadLoginForm();
   document.getElementById("forgot-link").onclick = () => popLoadForgotForm();
 }
 
-function popAttachLoginEvents() {
-  document.getElementById("login-btn").onclick = () => {
-    const email = document.getElementById("login-email").value;
-    const pass = document.getElementById("login-password").value;
-    let errors = [];
-
-    if (!email.trim()) {
-      errors.push(popGetText("errEmailEmpty"));
-    } else if (!popIsValidStrictEmail(email)) {
-      errors.push(popGetText("errEmailInvalid"));
-    }
-
-    if (!pass) {
-      errors.push(popGetText("errPassEmpty"));
-    } else if (/\s/.test(pass)) {
-      errors.push(popGetText("errPassRequirements"));
-    } else {
-      const hasLength = pass.length >= 8;
-      const hasUpper = /[A-Z]/.test(pass);
-      const hasNumber = /[0-9]/.test(pass);
-      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-
-      if (!hasLength || !hasUpper || !hasNumber || !hasSpecial) {
-        errors.push(popGetText("errPassRequirements"));
-      }
-    }
-    
-    if (errors.length > 0) { 
-      popShowAlert(errors.map(err => "• " + err).join("\n")); 
-      return; 
-    }
-    popShowAlert(popGetText("successLogin"));
-  };
-
-  document.getElementById("back-register").onclick = () => popLoadRegisterForm();
-  document.getElementById("forgot-link").onclick = () => popLoadForgotForm();
-}
-
 function popAttachForgotEvents() {
-  document.getElementById("reset-btn").onclick = () => {
+  const resetBtn = document.getElementById("reset-btn");
+  if (!resetBtn) return; // حماية لضمان وجود الزر في الصفحة قبل ربطه
+
+  resetBtn.onclick = async () => {
     const email = document.getElementById("forgot-email").value;
     let errors = [];
 
+    // 1. فحص البريد الإلكتروني الصارم منعاً للطلبات الوهمية
     if (!email.trim()) {
       errors.push(popGetText("errEmailEmpty"));
     } else if (!popIsValidStrictEmail(email)) {
@@ -1146,10 +1158,41 @@ function popAttachForgotEvents() {
       popShowAlert(errors.map(err => "• " + err).join("\n")); 
       return; 
     }
-    popShowAlert(popGetText("successReset"));
+
+    // ==========================================
+    // ⚡ الربط الفعلي مع Supabase لإرسال رابط التعيين
+    // ==========================================
+    if (!window.supabaseClient) {
+      popShowAlert("عذراً، لم يتم تهيئة اتصال قاعدة البيانات بعد.");
+      return;
+    }
+
+    try {
+      // إرسال طلب إعادة التعيين مع تحديد رابط العودة الذكي للموقع
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin + "/itqan-html/profile.html", 
+      });
+
+      if (error) {
+        popShowAlert("خطأ: " + error.message);
+      } else {
+        // نجحت العملية! اظهر الإشعار الأخضر للمستخدم
+        popShowAlert(popGetText("successReset"));
+      }
+    } catch (err) {
+      console.error("Reset Password Error:", err);
+      popShowAlert("حدث خطأ غير متوقع أثناء إرسال رابط إعادة التعيين.");
+    }
   };
 
-  document.getElementById("back-register").onclick = () => popLoadRegisterForm();
+  // رابط العودة لصفحة التسجيل أو الدخول
+  const backRegister = document.getElementById("back-register");
+  if (backRegister) {
+    backRegister.onclick = (e) => {
+      e.preventDefault();
+      popLoadRegisterForm();
+    };
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1157,49 +1200,75 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeModalBtn = document.getElementById("close-modal-btn");
   const modalOverlay = document.getElementById("auth-modal-overlay");
 
+  // 🟢 دمج الفحص الذكي عند الضغط على أيقونة المستخدم
   if (triggerIcon) {
-    triggerIcon.onclick = (e) => {
+    triggerIcon.onclick = async (e) => {
       e.preventDefault();
+
+      // تهيئة سوبابيز احتياطياً لو لم يكن جاهزاً
+      if (typeof supabase !== 'undefined' && !window.supabaseClient) {
+        window.supabaseClient = supabase.createClient(
+          "https://jacylpaxxgubvhofpuup.supabase.co", 
+          "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai"
+        );
+      }
+
+      if (window.supabaseClient) {
+        // فحص هل المستخدم مسجل فعلاً في سوبابيز؟
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+        if (user) {
+          // 1. إذا كان مسجلاً -> خذه لصفحة البروفايل عبر رابط ثابت لمنع أي تداخل مع about.html
+          window.location.href = window.location.origin + "/itqan-html/profile.html";
+          return; // إنهاء الدالة هنا حتى لا يفتح الـ Modal
+        }
+      }
+
+      // 2. إذا لم يكن مسجلاً -> افتح نافذة تسجيل الدخول المعتادة
       if (modalOverlay) modalOverlay.style.display = "flex";
       popLoadRegisterForm();
     };
   }
+
+  // إغلاق النافذة عند الضغط على زر الإكس
   if (closeModalBtn) {
-    closeModalBtn.onclick = () => { if (modalOverlay) modalOverlay.style.display = "none"; };
+    closeModalBtn.onclick = () => { 
+      if (modalOverlay) modalOverlay.style.display = "none"; 
+    };
   }
+
+  // إغلاق النافذة عند الضغط خارجها
   window.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) { modalOverlay.style.display = "none"; }
+    if (e.target === modalOverlay) { 
+      modalOverlay.style.display = "none"; 
+    }
   });
 });
-
-document.getElementById("auth-trigger-icon").onclick = () => {
-  const email = localStorage.getItem("userEmail");
-
-  if (email) {
-    // المستخدم مسجل دخول → افتح البروفايل
-    window.location.href = "profile.html";
-  } else {
-    // المستخدم غير مسجل → افتح نافذة تسجيل الدخول
-    openAuthModal();
-  }
-};
 
 function goToSalla(courseKey){
   alert("سيتم تفعيل الشراء عبر تطبيق سلة قريبًا ❤️");
 }
 
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  if (session && session.user) {
-    const email = session.user.email;
+// 🟢 مراقب حالة تسجيل الدخول الذكي (تم تعديله لمنع القفز التلقائي داخل صفحة about)
+if (typeof supabase !== 'undefined' || window.supabaseClient) {
+  const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai") : null);
+  
+  if (client) {
+    client.auth.onAuthStateChange(async (event, session) => {
+      if (session && session.user) {
+        const email = session.user.email;
+        localStorage.setItem("userEmail", email);
 
-    localStorage.setItem("userEmail", email);
-
-    window.location.href = "profile.html";
+        // التوجيه التلقائي يحدث فقط عند تسجيل الدخول الفعلي (SIGNED_IN) وإذا كان المستخدم واقفاً في الصفحة الرئيسية بالخارج فقط
+        if (event === 'SIGNED_IN' && 
+            (window.location.pathname.endsWith("/index.html") || window.location.pathname === "/" || window.location.pathname.endsWith("/"))) {
+          window.location.href = window.location.origin + "/itqan-html/profile.html";
+        }
+      }
+    });
   }
-});
+}
 
-
-// دالة تسجيل دخول قوقل المباشرة - استدعاء مباشر بدون الحاجة لـ IDs
 // دالة تسجيل دخول قوقل المتوافقة تماماً وبدقة مع هيكلية مجلدات مشروعك الحالية
 async function loginWithGoogleDirectly() {
   
@@ -1214,7 +1283,7 @@ async function loginWithGoogleDirectly() {
   if (window.supabaseClient) {
     let profilePath = "";
 
-    // 🟢 الفحص الحقيقي: إذا كان اسم الصفحة ينتهي بـ index.html أو كان الرابط هو الدومين الرئيسي فقط (الرئيسية بالخارج)
+    // الفحص الحقيقي: إذا كان اسم الصفحة ينتهي بـ index.html أو كان الرابط هو الدومين الرئيسي فقط (الرئيسية بالخارج)
     if (window.location.pathname.endsWith("/index.html") || window.location.pathname === "/" || window.location.pathname.endsWith("/")) {
       // بما أنه في الخارج، نوجهه للمجلد الفرعي
       profilePath = window.location.origin + "/itqan-html/profile.html";
@@ -1235,5 +1304,93 @@ async function loginWithGoogleDirectly() {
     }
   } else {
     console.error("Supabase library is missing!");
+  }
+}
+
+// ===================================================
+// 🔐 دالة معالجة أحداث تسجيل الدخول والربط مع Supabase
+// ===================================================
+function popAttachLoginEvents() {
+  const loginBtn = document.getElementById("login-btn");
+  if (!loginBtn) return; // حماية لضمان وجود الزر في الواجهة قبل ربطه
+
+  loginBtn.onclick = async () => {
+    const email = document.getElementById("login-email").value;
+    const pass = document.getElementById("login-password").value;
+    let errors = [];
+
+    // 1. فحص البريد الإلكتروني الصارم (الذي يمنع المسافات ويحصر النطاقات الحقيقية)
+    if (!email.trim()) {
+      errors.push(popGetText("errEmailEmpty"));
+    } else if (!popIsValidStrictEmail(email)) {
+      errors.push(popGetText("errEmailInvalid"));
+    }
+
+    // 2. فحص كلمة المرور ومنع المسافات داخلها
+    if (!pass) {
+      errors.push(popGetText("errPassEmpty"));
+    } else if (/\s/.test(pass)) {
+      errors.push(popGetText("errPassRequirements"));
+    } else {
+      const hasLength = pass.length >= 8;
+      const hasUpper = /[A-Z]/.test(pass);
+      const hasNumber = /[0-9]/.test(pass);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+
+      if (!hasLength || !hasUpper || !hasNumber || !hasSpecial) {
+        errors.push(popGetText("errPassRequirements"));
+      }
+    }
+    
+    // إذا وُجدت أي أخطاء في شروط المدخلات، اعرضها وتوقف فوراً
+    if (errors.length > 0) { 
+      popShowAlert(errors.map(err => "• " + err).join("\n")); 
+      return; 
+    }
+    
+    // ==========================================
+    // ⚡ الربط الفعلي مع Supabase لتسجيل الدخول
+    // ==========================================
+    if (!window.supabaseClient) {
+      popShowAlert("عذراً، لم يتم تهيئة اتصال قاعدة البيانات بعد.");
+      return;
+    }
+
+    try {
+      // إرسال طلب الدخول بالبريد والباسورد المكتوبين
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email: email.trim(),
+        password: pass
+      });
+
+      if (error) {
+        // إذا كان الحساب غير مسجل نهائياً، أو الباسورد خطأ، سيرفض السيرفر ويعيد الرسالة المناسبة هنا
+        popShowAlert("خطأ في تسجيل الدخول: " + error.message);
+      } else if (data.session) {
+        // إذا نجحت البيانات، اظهر إشعار النجاح وتوجه فوراً لصفحة البروفايل
+        popShowAlert(popGetText("successLogin"));
+        window.location.href = window.location.origin + "/itqan-html/profile.html";
+      }
+    } catch (err) {
+      console.error("Login Error:", err);
+      popShowAlert("حدث خطأ غير متوقع أثناء تسجيل الدخول.");
+    }
+  };
+
+  // 🔄 ربط أزرار التنقل والتحويل بين الواجهات داخل المودال ديناميكياً
+  const backRegister = document.getElementById("back-register");
+  if (backRegister) {
+    backRegister.onclick = (e) => {
+      e.preventDefault();
+      popLoadRegisterForm(); // العودة لإنشاء الحساب
+    };
+  }
+
+  const forgotLink = document.getElementById("forgot-link");
+  if (forgotLink) {
+    forgotLink.onclick = (e) => {
+      e.preventDefault();
+      popLoadForgotForm(); // الانتقال لصفحة نسيت كلمة المرور
+    };
   }
 }
