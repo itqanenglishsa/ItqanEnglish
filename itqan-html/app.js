@@ -458,8 +458,6 @@ function renderCourseCard(c, lang, isPurchased = false) {
   `;
 }
 
-
-
 const QUESTIONS = [
 
   // -------------------------
@@ -973,34 +971,24 @@ function popShowAlert(message) {
 // بناء فورم إنشاء الحساب (معدل بالكامل)
 function popLoadRegisterForm() {
   const container = document.getElementById("pop-dynamic-form");
-  if(!container) return;
-
+  if (!container) return;
   container.innerHTML = `
     <h2 class="auth-title">${popGetText("createAccountTitle")}</h2>
-    <input type="email" id="reg-email" placeholder="${popGetText("emailPlace")}">
-    <input type="password" id="reg-password" placeholder="${popGetText("passwordPlace")}">
-    <input type="password" id="reg-confirm" placeholder="${popGetText("confirmPlace")}">
-    
-    <button class="auth-btn" id="register-btn" style="width: 100%; padding: 14px; margin-top: 10px; border-radius: 25px; border: none; background: #0078D4; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;">${popGetText("btnCreate")}</button>
-    
+    <input type="email" id="login-email" placeholder="${popGetText("emailPlace")}">
+    <input type="password" id="login-password" placeholder="${popGetText("passwordPlace")}">
+    <button class="auth-btn" id="login-btn" style="width: 100%; padding: 14px; margin-top: 10px; border-radius: 25px; border: none; background: #0078D4; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;">${popGetText("btnLogin")}</button>
     <div class="auth-links" style="margin-top: 20px; font-size: 14px; color: #666;">
-      <a href="#" id="login-link" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("alreadyHave")}</a> |
       <a href="#" id="forgot-link" style="color: #0078D4; text-decoration: none; margin: 0 5px;">${popGetText("forgotPass")}</a>
     </div>
-    
     <div class="auth-social" style="margin-top: 25px;">
-      <button class="social-btn" id="google-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; width:100%; padding: 8px 12px; margin-bottom: 12px; border-radius: 25px; border: 1px solid #ccc; background:#fff; cursor:pointer; font-size: 15px; font-weight: 500;">
+      <button class="social-btn" onclick="loginWithGoogleDirectly()" style="display: flex; align-items: center; justify-content: center; gap: 10px; width:100%; padding: 12px; border-radius: 25px; border: 1px solid #ccc; background: #fff; cursor: pointer;">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69a5.74 5.74 0 0 1-2.49 3.77v3.12h4.01c2.34-2.16 3.69-5.32 3.69-8.74z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.01-3.12c-1.12.75-2.55 1.19-3.92 1.19-3.02 0-5.57-2.04-6.48-4.79H1.31v3.23A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.52 14.37A7.17 7.17 0 0 1 5.12 12c0-.82.14-1.62.4-2.37V6.4H1.31A11.94 11.94 0 0 0 0 12c0 2.12.55 4.12 1.52 5.87l4-3.5z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.93 11.93 0 0 0 12 0 12 12 0 0 0 1.31 6.4l4.21 3.23c.91-2.75 3.46-4.88 6.48-4.88z"/></svg>
         ${popGetText("googleSign")}
       </button>
-      <button class="social-btn" id="apple-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; width:100%; padding: 8px 12px; margin-bottom: 12px; border-radius: 25px; border: 1px solid #ccc; background:#fff; cursor:pointer; font-size: 15px; font-weight: 500;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39z"/></svg>
-        ${popGetText("appleSign")}
-      </button>
-    </div>
-  `;
-  popAttachRegisterEvents();
+    </div>`;
+  popAttachLoginEvents();
 }
+
 
 function popLoadLoginForm() {
   document.getElementById("pop-dynamic-form").innerHTML = `
@@ -1209,3 +1197,23 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     window.location.href = "profile.html";
   }
 });
+
+
+// دالة تسجيل دخول قوقل المباشرة - استدعاء مباشر بدون الحاجة لـ IDs
+async function loginWithGoogleDirectly() {
+  if (window.supabaseClient) {
+    try {
+      await window.supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          // التوجيه التلقائي المضمون لصفحة البروفايل بعد النجاح
+          redirectTo: window.location.origin + "/profile.html"
+        }
+      });
+    } catch (error) {
+      console.error("Google Auth Error:", error);
+    }
+  } else {
+    alert("Supabase is not initialized yet!");
+  }
+}
