@@ -1237,13 +1237,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (modalOverlay) modalOverlay.style.display = "none"; 
     };
   }
-
-  // إغلاق النافذة عند الضغط خارجها
-  window.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) { 
-      modalOverlay.style.display = "none"; 
-    }
-  });
 });
 
 function goToSalla(courseKey){
