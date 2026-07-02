@@ -1207,7 +1207,11 @@ async function loginWithGoogleDirectly() {
         provider: "google",
         options: {
           // التوجيه التلقائي المضمون لصفحة البروفايل بعد النجاح
-          redirectTo: window.location.origin + "/profile.html"
+          // ❌ احذف هذا السطر القديم:
+// redirectTo: window.location.origin + "/profile.html"
+
+// 🟢 وضَع مكانه هذا السطر الذكي:
+redirectTo: window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/profile.html"
         }
       });
     } catch (error) {
