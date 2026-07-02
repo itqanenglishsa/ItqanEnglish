@@ -14,21 +14,16 @@
 html[lang="ar"] .profile-title { text-align: right; }
 html[lang="en"] .profile-title { text-align: left; }
 .profile-title {
-  text-align: start; /* يتبع اتجاه الصفحة تلقائيًا */
+  text-align: start; 
 }
-
 .profile-title {
   display: flex !important;
   justify-content: center !important;
 }
-
-
 </style>
-
 </head>
 
 <body>
-
 
 <header class="header">
  <div class="header-inner">
@@ -36,7 +31,6 @@ html[lang="en"] .profile-title { text-align: left; }
     <img src="../images/logo.png" alt="Logo" style="height:40px">
   </a>
 
-  <!-- مخفية لأن المستخدم مسجل دخول -->
   <a href="#" id="auth-trigger-icon" class="user-icon-link" style="display:none;"></a>
 
   <nav class="nav">
@@ -59,19 +53,16 @@ html[lang="en"] .profile-title { text-align: left; }
   </nav>
 </div>
 
-<!-- مخفي داخل البروفايل -->
 <div id="auth-modal-overlay" class="pop-modal-overlay" style="display:none !important;"></div>
-
 </header>
 
 <main class="container" style="padding:4rem 1.5rem">
-
   <article class="card card-lg" style="text-align:center; margin-bottom:3rem;">
     <h2 class="text-2xl font-bold profile-title" data-i18n="profile.title"></h2>
 
     <p id="user-email" class="text-lg mt-4" style="color:var(--muted-foreground)">
       <span data-i18n="profile.email"></span>
-      <span id="email-value"></span>
+      <span id="email-value">جاري التحميل...</span>
     </p>
 
     <button id="logout-btn" class="cta mt-6" style="padding:.75rem 2rem;" data-i18n="profile.logout"></button>
@@ -83,18 +74,15 @@ html[lang="en"] .profile-title { text-align: left; }
   </div>
 
   <div id="courses-list" class="grid grid-2"></div>
-
 </main>
 
 <footer class="footer">
   <div class="footer-inner">
     <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
-
     <div class="stores" style="margin-top:0">
       <a href="https://apps.apple.com/sa/app/english-إتقان/id6759668469" target="_blank" rel="noopener">
         <img src="../images/appleIcon.png" alt="Download on the App Store" style="height:50px">
       </a>
-
       <div class="store store-disabled" aria-disabled="true">
         <span style="font-size:1.5rem">▶</span>
         <span class="store-lines">
@@ -106,62 +94,76 @@ html[lang="en"] .profile-title { text-align: left; }
 
     <div class="box">
       <h3 style="font-size: 1.2rem; margin:0;" data-i18n="footer.contact"></h3>
-
       <div style="display:flex; align-items:center; gap:10px; margin:0.5rem 0;">
-        <a href="https://wa.me/966508538283" target="_blank">
-          <img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;">
-        </a>
-
-        <a href="https://www.tiktok.com/@itqanenglish" target="_blank">
-          <img src="../images/TikTokIcon.png" style="width:30px; height:30px;">
-        </a>
-
-        <a href="https://t.me/Itqanenglish_sa" target="_blank">
-          <img src="../images/TelegramIcon.png" style="width:30px; height:30px;">
-        </a>
+        <a href="https://wa.me/966508538283" target="_blank"><img src="../images/WhatsAppIcon.png" style="width:31px; height:31px;"></a>
+        <a href="https://www.tiktok.com/@itqanenglish" target="_blank"><img src="../images/TikTokIcon.png" style="width:30px; height:30px;"></a>
+        <a href="https://t.me/Itqanenglish_sa" target="_blank"><img src="../images/TelegramIcon.png" style="width:30px; height:30px;"></a>
       </div>
     </div>
-
     <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
   </div>
 </footer>
 
 <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
 
+<!-- 🟢 1. استدعاء مكتبة سوبابيز الأساسية أولاً لحل خطأ الـ Console -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 2. استدعاء ملف الـ app.js الخاص بك -->
 <script src="app.js"></script>
 
+<!-- 3. السكربت الداخلي المحدث والذكي لقراءة بيانات الجلسة -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   applyLang();
 
-  const email = localStorage.getItem("userEmail");
-
-  if (email) {
-    document.getElementById("email-value").textContent = email;
-  } else {
-    document.getElementById("email-value").textContent = t("profile.notRegistered") || "غير مسجل";
-
+  // تهيئة سوبابيز حمايةً لو لم يتم تهيئته تلقائياً
+  if (typeof supabase !== 'undefined' && !window.supabaseClient) {
+    window.supabaseClient = supabase.createClient(
+      "https://jacylpaxxgubvhofpuup.supabase.co", 
+      "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai"
+    );
   }
 
+  if (window.supabaseClient) {
+    // جلب بيانات المستخدم الحالية بأمان من جلسة سوبابيز
+    const { data: { user }, error } = await window.supabaseClient.auth.getUser();
+
+    if (error || !user) {
+      // إذا حاول مستخدم غير مسجل الدخول، نعيده للصفحة الرئيسية فوراً
+      window.location.href = "../index.html";
+      return;
+    }
+
+    // عرض البريد الإلكتروني الحقيقي للمستخدم المسترجع من قوقل
+    document.getElementById("email-value").textContent = user.email;
+  } else {
+    document.getElementById("email-value").textContent = typeof t !== 'undefined' ? t("profile.notRegistered") : "غير مسجل";
+  }
+
+  // كود استعراض الكورسات المشحونة الخاص بك
   const purchasedKeys = JSON.parse(localStorage.getItem("purchasedCourses") || "[]");
-const purchasedCourses = COURSES.filter(c => purchasedKeys.includes(c.key));
+  const purchasedCourses = typeof COURSES !== 'undefined' ? COURSES.filter(c => purchasedKeys.includes(c.key)) : [];
 
-if (purchasedCourses.length === 0) {
-  document.getElementById("courses-list").innerHTML = `
-    <article class="card" style="text-align:center; padding:2rem;">
-      <p class="muted" data-i18n="profile.empty"></p>
-    </article>
-  `;
-} else {
-  document.getElementById("courses-list").innerHTML =
-    purchasedCourses.map(c => renderCourseCard(c, lang, true)).join('');
-}
-applyLang();
+  if (purchasedCourses.length === 0) {
+    document.getElementById("courses-list").innerHTML = `
+      <article class="card" style="text-align:center; padding:2rem;">
+        <p class="muted" data-i18n="profile.empty"></p>
+      </article>
+    `;
+  } else {
+    document.getElementById("courses-list").innerHTML =
+      purchasedCourses.map(c => renderCourseCard(c, lang, true)).join('');
+  }
+  applyLang();
 
-
-  document.getElementById("logout-btn").onclick = () => {
-    localStorage.removeItem("userEmail");
-    popShowAlert(t("profile.logout"));
+  // زر تسجيل الخروج الآمن من سوبابيز
+  document.getElementById("logout-btn").onclick = async () => {
+    if (window.supabaseClient) {
+      await window.supabaseClient.auth.signOut();
+    }
+    localStorage.removeItem("userEmail"); // تنظيف احتياطي
+    popShowAlert(typeof t !== 'undefined' ? t("profile.logout") : "تم تسجيل الخروج بنجاح");
     setTimeout(() => {
       window.location.href = "../index.html";
     }, 800);
