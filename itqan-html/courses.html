@@ -174,7 +174,7 @@ featuredContainer.innerHTML = COURSES
 function setActiveFilter(btn, skill, level){
   // إزالة التفعيل من كل الأزرار داخل نفس المهارة
   document.querySelectorAll(`#${skill.toLowerCase()}-filters .filter-btn`)
-    .forEach(b => b.classList.remove('active-filter'));
+    .forEach(b => b.classList.remove('active-filter'));ئ
 
   // تفعيل الزر الحالي
   btn.classList.add('active-filter');
@@ -419,6 +419,11 @@ document.addEventListener('keydown', function(event){
   document.addEventListener("DOMContentLoaded", () => {
     applyLang();
   });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
 </script>
 
 </body></html>
