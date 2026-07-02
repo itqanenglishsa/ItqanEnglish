@@ -1169,9 +1169,10 @@ function popAttachForgotEvents() {
 
     try {
       // إرسال طلب إعادة التعيين مع تحديد رابط العودة الذكي للموقع
-      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: window.location.origin + "/itqan-html/profile.html", 
-      });
+      // داخل دالة popAttachForgotEvents()
+const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email.trim(), {
+  redirectTo: window.location.origin + "/itqan-html/reset-password.html", // الصفحة الجديدة
+});
 
       if (error) {
         popShowAlert("خطأ: " + error.message);
