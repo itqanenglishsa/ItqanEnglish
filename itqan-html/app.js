@@ -1200,24 +1200,40 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
 
 
 // دالة تسجيل دخول قوقل المباشرة - استدعاء مباشر بدون الحاجة لـ IDs
+// دالة تسجيل دخول قوقل المتوافقة تماماً وبدقة مع هيكلية مجلدات مشروعك الحالية
 async function loginWithGoogleDirectly() {
+  
+  // حماية ذكية لتهيئة السيرفر تلقائياً لو لم يكن جاهزاً
+  if (!window.supabaseClient && typeof supabase !== 'undefined') {
+    window.supabaseClient = supabase.createClient(
+      "https://jacylpaxxgubvhofpuup.supabase.co", 
+      "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai"
+    );
+  }
+
   if (window.supabaseClient) {
+    let profilePath = "";
+
+    // 🟢 الفحص الحقيقي: إذا كان اسم الصفحة ينتهي بـ index.html أو كان الرابط هو الدومين الرئيسي فقط (الرئيسية بالخارج)
+    if (window.location.pathname.endsWith("/index.html") || window.location.pathname === "/" || window.location.pathname.endsWith("/")) {
+      // بما أنه في الخارج، نوجهه للمجلد الفرعي
+      profilePath = window.location.origin + "/itqan-html/profile.html";
+    } else {
+      // بما أنه في أي صفحة أخرى (كلها داخل itqan-html بجانب البروفايل)، نوجهه في نفس المجلد الحالي
+      profilePath = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/profile.html";
+    }
+
     try {
       await window.supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // التوجيه التلقائي المضمون لصفحة البروفايل بعد النجاح
-          // ❌ احذف هذا السطر القديم:
-// redirectTo: window.location.origin + "/profile.html"
-
-// 🟢 وضَع مكانه هذا السطر الذكي:
-redirectTo: window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/profile.html"
+          redirectTo: profilePath // تمرير المسار الذكي المضمون
         }
       });
     } catch (error) {
       console.error("Google Auth Error:", error);
     }
   } else {
-    alert("Supabase is not initialized yet!");
+    console.error("Supabase library is missing!");
   }
 }
