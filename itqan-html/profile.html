@@ -113,6 +113,7 @@ html[lang="en"] .profile-title { text-align: left; }
 <script src="app.js"></script>
 
 <!-- 3. السكربت الداخلي المحدث والذكي لقراءة بيانات الجلسة -->
+<!-- 3. السكربت الداخلي المحدث والذكي لقراءة بيانات الجلسة والكورسات من سوبابيز -->
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   applyLang();
@@ -135,34 +136,56 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // عرض البريد الإلكتروني الحقيقي للمستخدم المسترجع من قوقل
+    // عرض البريد الإلكتروني الحقيقي للمستخدم
     document.getElementById("email-value").textContent = user.email;
+
+    try {
+      // ⚡ جلب الكورسات المشتركة للطالب من جدول user_courses في Supabase مباشرة
+      const { data: userCourses, error: courseError } = await window.supabaseClient
+        .from('user_courses')
+        .select('course_key');
+
+      if (courseError) throw courseError;
+
+      // تحويل الكورسات المشحونة إلى مصفوفة نصوص بسيطة [ 'english-foundation', ... ]
+      const purchasedKeys = userCourses.map(item => item.course_key);
+      
+      // فلترة مصفوفة الكورسات الموجودة في app.js بناءً على ما يملكه الطالب في سوبابيز
+      const purchasedCourses = typeof COURSES !== 'undefined' ? COURSES.filter(c => purchasedKeys.includes(c.key)) : [];
+
+      if (purchasedCourses.length === 0) {
+        document.getElementById("courses-list").innerHTML = `
+          <article class="card" style="text-align:center; padding:2rem;">
+            <p class="muted" data-i18n="profile.empty">ليس لديك أي دورات مسجلة حالياً.</p>
+          </article>
+        `;
+      } else {
+        const currentLang = getLang();
+        // إرسال true كمعامل ثالث لإجبار الزر على التحول لـ "فتح"
+        document.getElementById("courses-list").innerHTML =
+          purchasedCourses.map(c => renderCourseCard(c, currentLang, true)).join('');
+      }
+      applyLang();
+
+    } catch (dbErr) {
+      console.error("Error fetching user courses from Supabase:", dbErr);
+      document.getElementById("courses-list").innerHTML = `
+        <article class="card" style="text-align:center; padding:2rem; border-color: red;">
+          <p class="muted">حدث خطأ أثناء تحميل دوراتك المشتراة.</p>
+        </article>
+      `;
+    }
+
   } else {
     document.getElementById("email-value").textContent = typeof t !== 'undefined' ? t("profile.notRegistered") : "غير مسجل";
   }
-
-  // كود استعراض الكورسات المشحونة الخاص بك
-  const purchasedKeys = JSON.parse(localStorage.getItem("purchasedCourses") || "[]");
-  const purchasedCourses = typeof COURSES !== 'undefined' ? COURSES.filter(c => purchasedKeys.includes(c.key)) : [];
-
-  if (purchasedCourses.length === 0) {
-    document.getElementById("courses-list").innerHTML = `
-      <article class="card" style="text-align:center; padding:2rem;">
-        <p class="muted" data-i18n="profile.empty"></p>
-      </article>
-    `;
-  } else {
-    document.getElementById("courses-list").innerHTML =
-      purchasedCourses.map(c => renderCourseCard(c, lang, true)).join('');
-  }
-  applyLang();
 
   // زر تسجيل الخروج الآمن من سوبابيز
   document.getElementById("logout-btn").onclick = async () => {
     if (window.supabaseClient) {
       await window.supabaseClient.auth.signOut();
     }
-    localStorage.removeItem("userEmail"); // تنظيف احتياطي
+    localStorage.removeItem("userEmail");
     popShowAlert(typeof t !== 'undefined' ? t("profile.logout") : "تم تسجيل الخروج بنجاح");
     setTimeout(() => {
       window.location.href = "../index.html";
