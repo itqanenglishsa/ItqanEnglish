@@ -666,7 +666,8 @@ const QUESTIONS = [
 ];
 const COURSES = [
   {
-    id: "foundations-a1",
+    id: "english-foundation", // 🟢 تم التحديث ليتوافق مع سوبابيز
+    key: "english-foundation", // 🟢 تم التحديث ليتوافق مع سوبابيز
     title: {
       en: "Foundation Course",
       ar: "الدورة التأسيسية"
