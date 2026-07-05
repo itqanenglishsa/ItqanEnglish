@@ -440,9 +440,10 @@ function renderCourseCard(c, lang, isPurchased = false) {
 
   // بناء الزر ديناميكياً: لو مشترك يوجه لصفحة الكورس، لو مو مشترك يشغل دالة الشراء
  
+// التعديل: جعل زر الكارت يستدعي handleRegistrationAction بدلاً من goToSalla مباشرة
 const actionButton = isPurchased
   ? `<a href="../Foundation-Course/foundation-course/index.html" class="cta text-sm font-semibold">${buttonText}</a>`
-  : `<a href="#" onclick="goToSalla('${c.key}')" class="cta text-sm font-semibold">${buttonText}</a>`;
+  : `<a href="#" onclick="handleRegistrationAction('${c.key}')" class="cta text-sm font-semibold">${buttonText}</a>`;
 
   return `
     <article class="card" style="background:var(--card);color:var(--foreground)">
