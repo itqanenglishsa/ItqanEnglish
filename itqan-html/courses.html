@@ -102,274 +102,26 @@
   </div>
 </div>
 
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+
+<!-- 1. استدعاء مكتبة سوبابيز أولاً -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-
-
-const SKILL_COURSES = {
-  Foundation: {
-    All: [
-      { key: "foundation", level: "Free", title: "Foundation Course", price: 59 }
-    ],
-    Free: [
-      { key: "foundation", level: "Free", title: "Foundation Course", price: 59 }
-    ]
-  }
-};
-
-function renderCourses(){
-  const lang = getLang();
-
-  // 1) نفس جزء الـ featured القديم (ما غيرناه)
-
-  const featuredContainer = document.getElementById("featured");
-
-
-  // 🔹 إعادة بناء قسم Featured courses
-featuredContainer.innerHTML = COURSES
-  .filter(c => c.featured)
-  .map(c => renderCourseCard(c, lang, false))
-  .join('');
-
-  
-  const LEVELS = {
-    Foundation: ["All", "Free"]
-  };
-  const SKILLS = ["Foundation"];
-
-  // 2) نبني الفلاتر لكل مهارة (أيقونات فقط)
-  SKILLS.forEach(skill => {
-    document.getElementById(`${skill.toLowerCase()}-filters`).innerHTML =
-  LEVELS[skill].map(level => {
-
-  let label = level;
-
-  if(level === "All"){
-    label = t("filter.all");
-  }
-  else if(level === "Free"){
-    label = t("filter.free");
-  }
-  else if(level.startsWith("+")){
-  const num = level.replace("+","");
-
-  label = getLang() === "ar"
-    ? "+" + num.replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d])
-    : level;
-}
-
-  return `
-    <button class="filter-btn"
-      onclick="setActiveFilter(this, '${skill}', '${level}')">
-      ${label}
-    </button>
-  `;
-}).join('');
-
-    // أول ما تفتح الصفحة: نعرض All لكل مهارة
-    renderSkill(skill, "All");
-  });
-}
-
-
-function setActiveFilter(btn, skill, level){
-  // إزالة التفعيل من كل الأزرار داخل نفس المهارة
-  document.querySelectorAll(`#${skill.toLowerCase()}-filters .filter-btn`)
-    .forEach(b => b.classList.remove('active-filter'));ئ
-
-  // تفعيل الزر الحالي
-  btn.classList.add('active-filter');
-
-  // عرض الكورسات
-  renderSkill(skill, level);
-}
-
-function formatNumber(num){
-  const lang = getLang();
-
-  // تحويل النص إلى رقم لو أمكن
-  const n = Number(num);
-
-  // لو ما قدر يتحول (مثل Free) نرجعه كما هو
-  if (isNaN(n)) return num;
-
-  return lang === "ar"
-    ? n.toLocaleString("ar-EG")
-    : n.toLocaleString("en-US");
-}
-
-function renderSkill(skill, level){
-  const courses = SKILL_COURSES[skill][level];
-
-    const courseCards = courses.map((c) => `
-    <article class="card" style="display:flex;flex-direction:column">
-
-      <div class="flex items-center gap-2">
-        <span class="lvl-pill lvl-pill-sm">
-          ${
-  c.level === "Free"
-    ? (getLang() === "ar" ? "A1" : "A1")
-    : c.level.startsWith("+")
-      ? "+" + formatNumber(c.level.replace("+",""))
-      : c.level
-}
-        </span>
-      </div>
-
-      <h3 class="text-lg font-semibold mt-3">
-  ${t(`skill.${c.key}.title`) !== `skill.${c.key}.title`
-      ? t(`skill.${c.key}.title`)
-      : c.title}
-</h3>
-
-      <p class="muted text-sm mt-2">
-  ${t(`skill.${c.key}.desc`) !== `skill.${c.key}.desc`
-      ? t(`skill.${c.key}.desc`)
-      : "A fun and interactive journey to learn English from scratch with clear, simple steps for everyone."}
-</p>
-
-      <div class="mt-4 flex items-center gap-4 muted text-xs">
-        <span>
-📖 ${
-  t(`skill.${c.key}.lessons`) !== `skill.${c.key}.lessons`
-    ? t(`skill.${c.key}.lessons`)
-    : "6 Units"
-}
-</span>
-      </div>
-
-      <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
-        <span class="font-bold">
-  ${
-  c.price === "Free"
-    ? (getLang() === "ar" ? "مجاني" : "Free")
-        : `<img src="../images/SARIcon.png" alt="SAR" class="currency-icon"> ${formatNumber(c.price)}`
-}
-</span>
-             <a href="#" class="text-primary text-sm font-semibold course-details-trigger" data-course-key="${c.key}">
-  ${t("courses.details")} →
-</a>
-      </div>
-
-    </article>
-  `).join('');
-
-  document.getElementById(`${skill.toLowerCase()}-grid`).innerHTML = courseCards;
-}
-
-
-
-
-
-
-
-
-function getFoundationModalContent(lang){
-  if(lang === 'ar'){
-    return `
-      <h2 id="foundation-modal-title">أولاً: عن الدورة (في سطور)</h2>
-      <p>انطلق في رحلة التحدث بالإنجليزية بثقة.. من الصفر وحتى التأسيس المتين!
-      التجربة التعليمية الأكثر تفاعلية على الإطلاق لتأسيس لغتك الإنجليزية (Level A1). هنا</p>
-
-      <h3>ثانيًا: محتوى الدورة (ماذا ستتعلم؟)</h3>
-      <div class="modal-list">
-        <p>الوحدة 1 | الحروف والأصوات: نطق الحروف، التمييز بين أصواتها، والحروف الصامتة والمركبة.</p>
-        <p>الوحدة 2 | فعل الكينونة (Verb to Be): وصف الأشخاص والأشياء، وصياغة الإثبات والنفي والسؤال.</p>
-        <p>الوحدة 3 | أقسام الكلام: معرفة الأسماء، الأفعال، الصفات، وحروف الجر وكيف تعمل معاً.</p>
-        <p>الوحدة 4 | بناء الجملة والأدوات: تركيب جملة صحيحة (فاعل + فعل + مفعول) واستخدام (A, An, The).</p>
-        <p>الوحدة 5 | المضارع البسيط: التعبير عن روتينك اليومي، وعاداتك، وصياغة الأسئلة باستخدام (Do/Does).</p>
-        <p>الوحدة 6 | مفردات ومحادثات: التحيات، الأرقام، أفراد العائلة، والتدرب على محادثات واقعية للتعريف بالنفس.</p>
-      </div>
-
-      <h3>ثالثًا: الميزات التفاعلية (سر تميّز الدورة)</h3>
-      <div class="modal-list">
-        <p>نظام صوتي تفاعلي: لا تخمن النطق بعد اليوم! كل كلمة وجملة مدعومة بأزرار صوتية فورية لتسمع النطق الصحيح وتكرره.</p>
-        <p>تمارين تطبيقية مستمرة: بعد كل قاعدة ومفردة، ستجد تمارين تفاعلية فورية (سحب وإفلات، إعادة ترتيب، واختيارات) لتتأكد من فهمك في نفس اللحظة.</p>
-        <p>اختبار نهائي شامل: في نهاية الدورة، ستخوض اختباراً ذكياً يقيس بدقة مدى استيعابك لكل ما درست ويؤكد جاهزيتك للانتقال للمستوى التالي.</p>
-        <p>شهادة إتمام: بمجرد اجتيازك للاختبار النهائي، ستحصل فوراً على شهادة إثبات كفاءة تتوج بها جهودك وتدعم بها ملفك الشخصي.</p>
-      </div>
-    `;
-  }
-
-  return `
-      <h2 id="foundation-modal-title">First: About the course (in brief)</h2>
-      <p>Start your journey to speaking English with confidence... from zero to a strong and solid foundation! The most interactive learning experience ever to build your English language foundation (Level A1). Here</p>
-
-      <h3>Second: Course content (what will you learn?)</h3>
-      <div class="modal-list">
-        <p>Unit 1 | Letters and sounds: letter pronunciation, distinguishing their sounds, and consonant and digraph letters.</p>
-        <p>Unit 2 | The verb to be: describing people and things, forming affirmatives, negatives, and questions.</p>
-        <p>Unit 3 | Parts of speech: learning nouns, verbs, adjectives, and prepositions and how they work together.</p>
-        <p>Unit 4 | Sentence building and articles: constructing a correct sentence (subject + verb + object) and using (A, An, The).</p>
-        <p>Unit 5 | Simple present: talking about your daily routine, habits, and forming questions with (Do/Does).</p>
-        <p>Unit 6 | Vocabulary and conversations: greetings, numbers, family members, and practicing real conversations for introducing yourself.</p>
-      </div>
-
-      <h3>Third: Interactive features (the course’s secret advantage)</h3>
-      <div class="modal-list">
-        <p>Interactive voice system: don’t guess pronunciation anymore! Every word and sentence is supported by instant audio buttons so you can hear the correct pronunciation and repeat it.</p>
-        <p>Continuing practice exercises: after every rule and vocabulary item, you’ll find instant interactive exercises (drag and drop, reorder, and multiple-choice) to check your understanding right away.</p>
-        <p>Comprehensive final test: at the end of the course, you’ll take a smart test that accurately measures what you’ve learned and confirms you’re ready for the next level.</p>
-        <p>Completion certificate: once you pass the final test, you’ll immediately receive a certificate proving your competency and supporting your profile.</p>
-      </div>
-    `;
-}
-
-function renderFoundationModal(){
-  const lang = getLang();
-  const modalBody = document.querySelector('#foundation-modal .modal-body');
-  const actions = document.querySelector('#foundation-modal .modal-actions');
-  if(modalBody){
-    modalBody.innerHTML = getFoundationModalContent(lang);
-  }
-  if(actions){
-    actions.innerHTML = `
-      <button type="button" class="btn-secondary modal-close-btn">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
-      <button type="button" class="cta modal-primary-btn" onclick="goToSalla('foundation')">
-  ${lang === 'ar' ? 'سجّل الآن' : 'Register Now'}
-</button>
-
-    `;
-  }
-}
-
-function openFoundationModal(event){
-  if(event) event.preventDefault();
-  const modal = document.getElementById('foundation-modal');
-  if(!modal) return;
-  renderFoundationModal();
-  modal.classList.remove('hidden');
-  modal.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeFoundationModal(){
-  const modal = document.getElementById('foundation-modal');
-  if(!modal) return;
-  modal.classList.add('hidden');
-  modal.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('click', function(event){
-  const trigger = event.target.closest('.course-details-trigger');
-  if(trigger){
-    event.preventDefault();
-    openFoundationModal();
-    return;
-  }
-  if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
-    closeFoundationModal();
-  }
-});
-
-document.addEventListener('keydown', function(event){
-  if(event.key === 'Escape'){
-    closeFoundationModal();
-  }
-});
-
-
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
 </script>
+
+
+
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
+</script>
+
+
+
+
 
 <footer class="footer"><div class="footer-inner">
   <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
@@ -405,25 +157,321 @@ document.addEventListener('keydown', function(event){
 
   <p>© <span id="year"></span> Itqan English. <span data-i18n="footer.rights"></span></p>
 </div></footer>
-<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
-<script src="app.js"></script>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    renderCourses();
-  });
-</script>
 
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    applyLang();
-  });
-</script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
 </script>
+
+
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
+</script>
+
+<script src="app.js"></script>
+
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
+</script>
+
+<script src="app.js"></script>
+
+<script>
+// تخزين الكورسات التي يمتلكها المستخدم حالياً وحالة تسجيل دخوله
+let userPurchasedKeys = [];
+let isLoggedIn = false;
+
+// المسار الموحد والثابت لفتح محتوى الدورة بعد الشراء
+const COURSE_VIEW_URL = "course-view.html?id=english-foundation";
+
+const SKILL_COURSES = {
+  Foundation: {
+    All: [
+      { key: "english-foundation", level: "Free", price: 59 }
+    ],
+    Free: [
+      { key: "english-foundation", level: "Free", price: 59 }
+    ]
+  }
+};
+
+async function checkUserStatus() {
+  if (window.supabaseClient) {
+    try {
+      const { data: { user } } = await window.supabaseClient.auth.getUser();
+      if (user) {
+        isLoggedIn = true;
+        const { data: userCourses } = await window.supabaseClient
+          .from('user_courses')
+          .select('course_key');
+        
+        if (userCourses) {
+          userPurchasedKeys = userCourses.map(item => item.course_key);
+        }
+      } else {
+        isLoggedIn = false;
+      }
+    } catch (err) {
+      console.error("Error checking user status:", err);
+    }
+  }
+}
+
+async function renderCourses(){
+  const lang = getLang();
+  const featuredContainer = document.getElementById("featured");
+
+  // فحص حالة المستخدم والكورسات المشتراة من سوبابيز أولاً
+  await checkUserStatus();
+
+  // 🔹 1) بناء قسم Featured courses ذكياً
+  if (featuredContainer) {
+    featuredContainer.innerHTML = COURSES
+      .filter(c => c.featured)
+      .map(c => {
+        const isPurchased = userPurchasedKeys.includes(c.key);
+        const cardHtml = renderCourseCard(c, lang, isPurchased);
+        if (isPurchased) {
+          return cardHtml.replace(/href="[^"]*profile\.html[^"]*"/g, `href="${COURSE_VIEW_URL}"`);
+        }
+        return cardHtml;
+      })
+      .join('');
+  }
+  
+  const LEVELS = {
+    Foundation: ["All", "Free"]
+  };
+  const SKILLS = ["Foundation"];
+
+  // نبني الفلاتر لكل مهارة
+  SKILLS.forEach(skill => {
+    const filterEl = document.getElementById(`${skill.toLowerCase()}-filters`);
+    if (filterEl) {
+      filterEl.innerHTML = LEVELS[skill].map(level => {
+        let label = level;
+        if(level === "All") label = t("filter.all");
+        else if(level === "Free") label = t("filter.free");
+        else if(level.startsWith("+")){
+          const num = level.replace("+","");
+          label = getLang() === "ar" ? "+" + num.replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : level;
+        }
+
+        return `
+          <button class="filter-btn" onclick="setActiveFilter(this, '${skill}', '${level}')">
+            ${label}
+          </button>
+        `;
+      }).join('');
+    }
+
+    renderSkill(skill, "All");
+  });
+}
+
+function setActiveFilter(btn, skill, level){
+  document.querySelectorAll(`#${skill.toLowerCase()}-filters .filter-btn`)
+    .forEach(b => b.classList.remove('active-filter'));
+
+  btn.classList.add('active-filter');
+  renderSkill(skill, level);
+}
+
+function formatNumber(num){
+  const lang = getLang();
+  const n = Number(num);
+  if (isNaN(n)) return num;
+
+  return lang === "ar" ? n.toLocaleString("ar-EG") : n.toLocaleString("en-US");
+}
+
+function renderSkill(skill, level){
+  const courses = SKILL_COURSES[skill][level];
+
+  const courseCards = courses.map((c) => {
+    // جلب بيانات الكورس بالكامل وديناميكياً من COURSES الموحدة في app.js لمنع اختفاء العربي
+    const fullCourse = typeof COURSES !== 'undefined' ? COURSES.find(item => item.key === c.key) : null;
+    
+    const courseTitle = fullCourse ? fullCourse.title[getLang()] : (t(`skill.${c.key}.title`) !== `skill.${c.key}.title` ? t(`skill.${c.key}.title`) : c.key);
+    const courseDesc = fullCourse ? fullCourse.description[getLang()] : "A fun and interactive journey to learn English from scratch with clear, simple steps for everyone.";
+    const courseLessons = fullCourse ? `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}` : "6 Units";
+    const coursePrice = fullCourse ? fullCourse.price[getLang()] : "59";
+
+    return `
+    <article class="card" style="display:flex;flex-direction:column">
+      <div class="flex items-center gap-2">
+        <span class="lvl-pill lvl-pill-sm">
+          ${c.level === "Free" ? "A1" : c.level.startsWith("+") ? "+" + formatNumber(c.level.replace("+","")) : c.level}
+        </span>
+      </div>
+
+      <h3 class="text-lg font-semibold mt-3">${courseTitle}</h3>
+
+      <p class="muted text-sm mt-2">${courseDesc}</p>
+
+      <div class="mt-4 flex items-center gap-4 muted text-xs">
+        <span>📖 ${courseLessons}</span>
+      </div>
+
+      <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
+        <span class="font-bold">
+          <img src="../images/SARIcon.png" alt="SAR" class="currency-icon"> ${formatNumber(coursePrice)}
+        </span>
+        <a href="#" class="text-primary text-sm font-semibold course-details-trigger" data-course-key="${c.key}">
+          ${t("courses.details")} →
+        </a>
+      </div>
+    </article>
+  `}).join('');
+
+  const gridEl = document.getElementById(`${skill.toLowerCase()}-grid`);
+  if (gridEl) gridEl.innerHTML = courseCards;
+}
+
+function getFoundationModalContent(lang){
+  if(lang === 'ar'){
+    return `
+      <h2 id="foundation-modal-title">أولاً: عن الدورة (في سطور)</h2>
+      <p>انطلق في رحلة التحدث بالإنجليزية بثقة.. من الصفر وحتى التأسيس المتين!<br>
+      التجربة التعليمية الأكثر تفاعلية على الإطلاق لتأسيس لغتك الإنجليزية (Level A1). هنا</p>
+
+      <h3>ثانياً: محتوى الدورة (ماذا ستتعلم؟)</h3>
+      <div class="modal-list">
+        <p><strong>الوحدة 1 | الحروف والأصوات:</strong> نطق الحروف، التمييز بين أصواتها، والحروف الصامتة والمركبة.</p>
+        <p><strong>الوحدة 2 | فعل الكينونة (Verb to Be):</strong> وصف الأشخاص والأشياء، وصياغة الإثبات والنفي والسؤال.</p>
+        <p><strong>الوحدة 3 | أقسام الكلام:</strong> معرفة الأسماء، الأفعال، الصفات، وحروف الجر وكيف تعمل معاً.</p>
+        <p><strong>الوحدة 4 | بناء الجملة والأدوات:</strong> تركيب جملة صحيحة (فاعل + فعل + مفعول) واستخدام (A, An, The).</p>
+        <p><strong>الوحدة 5 | المضارع البسيط:</strong> التعبير عن روتينك اليومي، وعاداتك، وصياغة الأسئلة باستخدام (Do/Does).</p>
+        <p><strong>الوحدة 6 | مفردات ومحادثات:</strong> التحيات، الأرقام، أفراد العائلة، والتدرب على محادثات واقعية للتعريف بالنفس.</p>
+      </div>
+
+      <h3>ثالثاً: الميزات التفاعلية (سر تميّز الدورة)</h3>
+      <p>ما يجعل هذه الدورة الفريدة من نوعها والأفضل على الإطلاق هو نظام التفاعل الذكي المدمج بها:</p>
+      <div class="modal-list">
+        <p><strong>نظام صوتي تفاعلي:</strong> لا تخمن النطق بعد اليوم! كل كلمة وجملة مدعومة بأزرار صوتية فورية لتسمع النطق الصحيح وتكرره.</p>
+        <p><strong>تمارين تطبيقية مستمرة:</strong> بعد كل قاعدة ومفردة، ستجد تمارين تفاعلية فورية (سحب وإفلات، إعادة ترتيب، واختيارات) لتتأكد من فهمك في نفس اللحظة.</p>
+        <p><strong>اختبار نهائي شامل:</strong> في نهاية الدورة، ستخوض اختباراً ذكياً يقيس بدقة مدى استيعابك لكل ما درست ويؤكد جاهزيتك للانتقال للمستوى التالي.</p>
+        <p><strong>شهادة إتمام:</strong> بمجرد اجتيازك للاختبار النهائي، ستحصل فوراً على شهادة إثبات كفاءة تتوج بها جهودك المبذولة.</p>
+      </div>
+    `;
+  }
+  
+  // النص باللغة الإنجليزية
+  return `
+      <h2 id="foundation-modal-title">First: About the Course</h2>
+      <p>Start your journey to speaking English with confidence—from absolute beginner to a strong foundation!<br>
+      Experience one of the most interactive English learning courses designed for Level A1 learners. Build your language skills through engaging lessons, practical exercises, and interactive learning tools.</p>
+
+      <h3>Second: Course Content (What Will You Learn?)</h3>
+      <div class="modal-list">
+        <p><strong>Unit 1 | Letters & Sounds:</strong> Learn the English alphabet, letter pronunciation, different letter sounds, silent letters, and common letter combinations.</p>
+        <p><strong>Unit 2 | Verb to Be:</strong> Learn how to describe people and objects, and form affirmative, negative, and question sentences using the verb to be.</p>
+        <p><strong>Unit 3 | Parts of Speech:</strong> Understand nouns, verbs, adjectives, and prepositions, and learn how they work together to form correct sentences.</p>
+        <p><strong>Unit 4 | Sentence Structure & Articles:</strong> Build correct English sentences using the basic structure (Subject + Verb + Object) and learn how to use A, An, and The correctly.</p>
+        <p><strong>Unit 5 | Present Simple Tense:</strong> Talk about your daily routines and habits, and learn how to ask and answer questions using Do and Does.</p>
+        <p><strong>Unit 6 | Vocabulary & Conversations:</strong> Learn greetings, numbers, family members, and practice real-life conversations to introduce yourself confidently.</p>
+      </div>
+
+      <h3>Third: Interactive Features (What Makes This Course Unique?)</h3>
+      <p>What makes this course truly unique is its built-in interactive learning system:</p>
+      <div class="modal-list">
+        <p><strong>Interactive Audio Support:</strong> Never guess the pronunciation again! Every word and sentence includes an instant audio button so you can listen, repeat, and improve your pronunciation.</p>
+        <p><strong>Continuous Practice Activities:</strong> After every lesson, you’ll complete interactive exercises such as drag-and-drop activities, sentence ordering, and multiple-choice questions to reinforce your understanding.</p>
+        <p><strong>Comprehensive Final Exam:</strong> At the end of the course, you’ll take a smart final assessment that accurately measures your progress and confirms your readiness for the next level.</p>
+        <p><strong>Certificate of Completion:</strong> Once you successfully pass the final exam, you’ll instantly receive a certificate recognizing your achievement and the effort you’ve put into completing the course.</p>
+      </div>
+    `;
+}
+
+function handleRegistrationAction(courseKey) {
+  if (!isLoggedIn) {
+    if (typeof popShowAlert !== 'undefined') {
+      popShowAlert(getLang() === 'ar' ? 'يرجى تسجيل الدخول أو إنشاء حساب أولاً لتتمكن من التسجيل في الدورة.' : 'Please login or create an account first to register for the course.');
+    } else {
+      alert(getLang() === 'ar' ? 'يرجى تسجيل الدخول أولاً' : 'Please login first');
+    }
+    const authTrigger = document.getElementById("auth-trigger-icon");
+    if (authTrigger) authTrigger.click();
+  } else {
+    if (typeof goToSalla !== 'undefined') {
+      goToSalla(courseKey);
+    } else {
+      alert("سيتم تفعيل الشراء عبر تطبيق سلة قريبًا ❤️");
+    }
+  }
+}
+
+function renderFoundationModal(){
+  const lang = getLang();
+  const modalBody = document.querySelector('#foundation-modal .modal-body');
+  const actions = document.querySelector('#foundation-modal .modal-actions');
+  
+  if(modalBody) modalBody.innerHTML = getFoundationModalContent(lang);
+  
+  if(actions){
+    const isPurchased = userPurchasedKeys.includes('english-foundation');
+    
+    // زر النافذة المنبثقة الداخلي يتغير ديناميكياً
+const primaryBtn = isPurchased
+  ? `<button type="button" class="cta modal-primary-btn" onclick="window.location.href='../Foundation-Course/foundation-course/index.html'">${lang === 'ar' ? 'فتح الدورة ←' : 'Open Course ←'}</button>`
+  : `<button type="button" class="cta modal-primary-btn" onclick="handleRegistrationAction('english-foundation')">${lang === 'ar' ? 'سجّل الآن' : 'Register Now'}</button>`;
+
+    actions.innerHTML = `
+      <button type="button" class="btn-secondary modal-close-btn">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
+      ${primaryBtn}
+    `;
+  }
+}
+
+function openFoundationModal(event){
+  if(event) event.preventDefault();
+  const modal = document.getElementById('foundation-modal');
+  if(!modal) return;
+  renderFoundationModal();
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFoundationModal(){
+  const modal = document.getElementById('foundation-modal');
+  if(!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('click', function(event){
+  const trigger = event.target.closest('.course-details-trigger');
+  if(trigger){
+    event.preventDefault();
+    openFoundationModal();
+    return;
+  }
+  if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
+    closeFoundationModal();
+  }
+});
+
+document.addEventListener('keydown', function(event){
+  if(event.key === 'Escape') closeFoundationModal();
+});
+
+// تشغيل وتهيئة الصفحة بالتزامن
+document.addEventListener("DOMContentLoaded", async () => {
+  await renderCourses();
+  applyLang();
+});
+</script>
+
 
 </body></html>
