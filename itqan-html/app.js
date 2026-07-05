@@ -421,15 +421,28 @@ const DICT = {
 "profile.notRegistered": "غير مسجل",
 
 
-
-
-
   }
 };
 
 
+// دالة مساعدة لتنسيق الأرقام لعرضها بشكل صحيح
+function formatNumber(num) {
+  if (num === undefined || num === null) return '';
+  return num.toString();
+}
+
+
 function renderCourseCard(c, lang, isPurchased = false) {
-  const buttonText = isPurchased ? "فتح →" : `${t("courses.enroll")} →`;
+  // تحديد نص الزر والترجمة المناسبة بناءً على اللغة وحالة الشراء
+  const buttonText = isPurchased 
+    ? (lang === 'ar' ? "فتح الدورة ←" : "Open Course ←") 
+    : `${t("courses.enroll")} →`;
+
+  // بناء الزر ديناميكياً: لو مشترك يوجه لصفحة الكورس، لو مو مشترك يشغل دالة الشراء
+ 
+const actionButton = isPurchased
+  ? `<a href="../Foundation-Course/foundation-course/index.html" class="cta text-sm font-semibold">${buttonText}</a>`
+  : `<a href="#" onclick="goToSalla('${c.key}')" class="cta text-sm font-semibold">${buttonText}</a>`;
 
   return `
     <article class="card" style="background:var(--card);color:var(--foreground)">
@@ -452,12 +465,11 @@ function renderCourseCard(c, lang, isPurchased = false) {
           ${formatNumber(c.price[lang])}
         </span>
 
-        <a href="#" onclick="goToSalla('${c.key}')" class="cta text-sm font-semibold">${buttonText}</a>
+        ${actionButton}
       </div>
     </article>
   `;
 }
-
 const QUESTIONS = [
 
   // -------------------------
