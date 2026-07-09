@@ -989,11 +989,14 @@ const slidesData = [
     description: "تأخذ مكان الاسم وتمنع التكرار الركيك. مثال: بدلاً من قول 'Ahmad is teacher. Ahmad is smart' نقول: 'Ahmad is a teacher, he is smart.'",
     letter: "Pronouns",
     examples: [
-      { word: "I", arabic: "أنا", emoji: "🧑" },
-      { word: "He", arabic: "هو", emoji: "🧔" },
-      { word: "She", arabic: "هي", emoji: "👩" },
-      { word: "They", arabic: "هم", emoji: "👥" }
-    ]
+  { word: "I", arabic: "أنا", emoji: "🧑" },
+  { word: "You", arabic: "أنت / أنتم / أنتن", emoji: "👈" },
+  { word: "He", arabic: "هو", emoji: "🧔" },
+  { word: "She", arabic: "هي", emoji: "👩" },
+  { word: "It", arabic: "هو / هي / شيء", emoji: "🐾" },
+  { word: "We", arabic: "نحن", emoji: "👨‍👩‍👧" },
+  { word: "They", arabic: "هم", emoji: "👥" }
+]
   },
 
   // PREPOSITIONS SPECIFIC
