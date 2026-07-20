@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+html {
+  font-size: 75%; /* Scales down all rem-based sizes by 25% for high-fidelity exact match */
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: "Almarai", "Inter", sans-serif;
+  direction: rtl; /* Arabic first */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars matching brand theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #84a5f2;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #214ecf;
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* RTL / LTR direction controls */
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
