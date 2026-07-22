@@ -1,3 +1,31 @@
+
+// ==========================================
+// 1. طبقة حماية المحتوى ومنع التفتيش (Anti-Piracy)
+// ==========================================
+const initCourseProtection = () => {
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')) { e.preventDefault(); return false; }
+    if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.key === 'C' || e.key === 'c' || e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+  });
+
+  setInterval(() => {
+    const startTime = performance.now();
+    debugger; 
+    const endTime = performance.now();
+    if (endTime - startTime > 50) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  }, 500);
+};
+
+// تشغيل الحماية فوراً
+initCourseProtection();
+
+
 const newWordsTips = [
   "إليك 3 كلمات أساسية لمستوى A1:\nOkay (حسنًا) 👍\nThank you (شكرًا لك) 🙏\nThanks (شكرًا) 😊",
   "إليك 3 كلمات أساسية لمستوى A1:\nPlease (من فضلك) 🙂🙏\nFine (بخير) 😄\nMorning (الصباح) 🌅",
