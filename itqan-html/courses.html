@@ -75,16 +75,8 @@
 
       <div class="skill-filters" id="foundation-filters"></div>
       <div class="skill-grid" id="foundation-grid"></div>
-    </div>
 
-    <div class="skill-block" data-skill="Vocabulary">
-      <h2 class="skill-title">
-        <img src="../images/VocabularyIcon.png" class="skill-main-icon">
-        <span data-i18n="section.Vocabulary"></span>
-      </h2>
-
-      <div class="skill-filters" id="vocabulary-filters"></div>
-      <div class="skill-grid" id="vocabulary-grid"></div>
+      
     </div>
 
   <div class="card card-lg text-center" style="margin-top:5rem;padding:2.5rem">
@@ -110,20 +102,26 @@
   </div>
 </div>
 
-<div id="vocabulary-modal" class="modal-backdrop hidden" aria-hidden="true">
-  <div class="modal-overlay" id="vocabulary-modal-overlay"></div>
-  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="vocabulary-modal-title">
-    <div class="modal-body">
-      <!-- vocabulary content is rendered dynamically based on language -->
-    </div>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
 
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
-        <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- 1. استدعاء مكتبة سوبابيز أولاً -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
+</script>
+
+
+
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = supabase.createClient("https://jacylpaxxgubvhofpuup.supabase.co", "sb_publishable_nZWgIK-1xvFsUEBYMfnsrw_l_Dzl2Ai");
+</script>
+
+
+
+
 
 <footer class="footer"><div class="footer-inner">
   <div class="logo"><img src="../images/logo.png" alt="Logo" style="height:40px"></div>
@@ -192,10 +190,8 @@
 let userPurchasedKeys = [];
 let isLoggedIn = false;
 
-const COURSE_VIEW_URLS = {
-  "english-foundation": "../Foundation-Course/foundation-course/index.html",
-  "vocab500": "../vocab500/vocab500/index.html"
-};
+// المسار الموحد والثابت لفتح محتوى الدورة بعد الشراء
+const COURSE_VIEW_URL = "course-view.html?id=english-foundation";
 
 const SKILL_COURSES = {
   Foundation: {
@@ -204,14 +200,6 @@ const SKILL_COURSES = {
     ],
     Free: [
       { key: "english-foundation", level: "Free", price: 59 }
-    ]
-  },
-  Vocabulary: {
-    All: [
-      { key: "vocab500", level: "A1", price: 0 }
-    ],
-    Free: [
-      { key: "vocab500", level: "A1", price: 0 }
     ]
   }
 };
@@ -249,15 +237,21 @@ async function renderCourses(){
   if (featuredContainer) {
     featuredContainer.innerHTML = COURSES
       .filter(c => c.featured)
-      .map(c => renderCourseCard(c, lang, userPurchasedKeys.includes(c.key)))
+      .map(c => {
+        const isPurchased = userPurchasedKeys.includes(c.key);
+        const cardHtml = renderCourseCard(c, lang, isPurchased);
+        if (isPurchased) {
+          return cardHtml.replace(/href="[^"]*profile\.html[^"]*"/g, `href="${COURSE_VIEW_URL}"`);
+        }
+        return cardHtml;
+      })
       .join('');
   }
   
   const LEVELS = {
-    Foundation: ["All", "Free"],
-    Vocabulary: ["All", "Free"]
+    Foundation: ["All", "Free"]
   };
-  const SKILLS = ["Foundation", "Vocabulary"];
+  const SKILLS = ["Foundation"];
 
   // نبني الفلاتر لكل مهارة
   SKILLS.forEach(skill => {
@@ -304,6 +298,7 @@ function renderSkill(skill, level){
   const courses = SKILL_COURSES[skill][level];
 
   const courseCards = courses.map((c) => {
+    // جلب بيانات الكورس بالكامل وديناميكياً من COURSES الموحدة في app.js لمنع اختفاء العربي
     const fullCourse = typeof COURSES !== 'undefined' ? COURSES.find(item => item.key === c.key) : null;
     
     const courseTitle = fullCourse ? fullCourse.title[getLang()] : (t(`skill.${c.key}.title`) !== `skill.${c.key}.title` ? t(`skill.${c.key}.title`) : c.key);
@@ -415,40 +410,6 @@ function handleRegistrationAction(courseKey) {
   }
 }
 
-function getVocabularyModalContent(lang){
-  if (lang === 'ar') {
-    return `
-      <h2 id="vocabulary-modal-title">أولاً: عن الدورة (في سطور)</h2>
-      <p>انطلق في رحلة ممتعة لتوسيع مفرداتك الإنجليزية بطريقة عملية وبسيطة، مع تركيز على الكلمات الأكثر استخدامًا في الحياة اليومية.</p>
-
-      <h3>ثانياً: محتوى الدورة (ماذا ستتعلم؟)</h3>
-      <div class="modal-list">
-        <p><strong>الوحدة 1 | المفردات الأساسية:</strong> ستتعلم كلمات شائعة جدًا وتستخدمها في محادثاتك اليومية.</p>
-        <p><strong>الوحدة 2 | التطبيق العملي:</strong> ستتدرب على فهم الكلمات في سياقات حقيقية من خلال أمثلة وأداءات.</p>
-        <p><strong>الوحدة 3 | التكرار والتمييز:</strong> ستُحسّن حفظك للفظ والمعنى باستخدام أسئلة تفاعلية وتطبيقات عملية.</p>
-      </div>
-
-      <h3>ثالثاً: الميزات التفاعلية</h3>
-      <p>تجربة داعمة تتيح لك مراجعة المفردات والاستماع إليها، ثم التطبيق الفوري عبر التمارين التفاعلية.</p>
-    `;
-  }
-
-  return `
-    <h2 id="vocabulary-modal-title">First: About the Course</h2>
-    <p>Start a practical and engaging journey to expand your English vocabulary using the most useful words for real communication.</p>
-
-    <h3>Second: Course Content (What Will You Learn?)</h3>
-    <div class="modal-list">
-      <p><strong>Unit 1 | Core Vocabulary:</strong> Learn high-frequency words that you will use in everyday interactions.</p>
-      <p><strong>Unit 2 | Practical Application:</strong> Practice vocabulary in real-life contexts using examples and guided exercises.</p>
-      <p><strong>Unit 3 | Review and Mastery:</strong> Strengthen memory and usage through interactive quizzes and repetition.</p>
-    </div>
-
-    <h3>Third: Interactive Features</h3>
-    <p>The experience is designed to help you listen, review, and use new vocabulary immediately through interactive activities.</p>
-  `;
-}
-
 function renderFoundationModal(){
   const lang = getLang();
   const modalBody = document.querySelector('#foundation-modal .modal-body');
@@ -471,41 +432,11 @@ const primaryBtn = isPurchased
   }
 }
 
-function renderVocabularyModal(){
-  const lang = getLang();
-  const modalBody = document.querySelector('#vocabulary-modal .modal-body');
-  const actions = document.querySelector('#vocabulary-modal .modal-actions');
-  
-  if(modalBody) modalBody.innerHTML = getVocabularyModalContent(lang);
-  
-  if(actions){
-    const isPurchased = userPurchasedKeys.includes('vocab500');
-    const primaryBtn = isPurchased
-      ? `<button type="button" class="cta modal-primary-btn" onclick="window.location.href='../vocab500/vocab500/index.html'">${lang === 'ar' ? 'فتح الدورة ←' : 'Open Course ←'}</button>`
-      : `<button type="button" class="cta modal-primary-btn" onclick="handleRegistrationAction('vocab500')">${lang === 'ar' ? 'سجّل الآن' : 'Register Now'}</button>`;
-
-    actions.innerHTML = `
-      <button type="button" class="btn-secondary modal-close-btn">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
-      ${primaryBtn}
-    `;
-  }
-}
-
 function openFoundationModal(event){
   if(event) event.preventDefault();
   const modal = document.getElementById('foundation-modal');
   if(!modal) return;
   renderFoundationModal();
-  modal.classList.remove('hidden');
-  modal.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-
-function openVocabularyModal(event){
-  if(event) event.preventDefault();
-  const modal = document.getElementById('vocabulary-modal');
-  if(!modal) return;
-  renderVocabularyModal();
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden','false');
   document.body.style.overflow = 'hidden';
@@ -519,39 +450,20 @@ function closeFoundationModal(){
   document.body.style.overflow = '';
 }
 
-function closeVocabularyModal(){
-  const modal = document.getElementById('vocabulary-modal');
-  if(!modal) return;
-  modal.classList.add('hidden');
-  modal.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-
 document.addEventListener('click', function(event){
   const trigger = event.target.closest('.course-details-trigger');
   if(trigger){
     event.preventDefault();
-    const courseKey = trigger.getAttribute('data-course-key');
-    if(courseKey === 'vocab500') {
-      openVocabularyModal();
-    } else {
-      openFoundationModal();
-    }
+    openFoundationModal();
     return;
   }
   if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
     closeFoundationModal();
   }
-  if(event.target.closest('.modal-close-btn') || event.target.id === 'vocabulary-modal-overlay'){
-    closeVocabularyModal();
-  }
 });
 
 document.addEventListener('keydown', function(event){
-  if(event.key === 'Escape') {
-    closeFoundationModal();
-    closeVocabularyModal();
-  }
+  if(event.key === 'Escape') closeFoundationModal();
 });
 
 // تشغيل وتهيئة الصفحة بالتزامن
