@@ -1,22 +1,20 @@
 /**
- * 🔒 نظام الحماية والأمان المتقدم - منصة إتقان English © 2026
- * تم التطوير لحماية المحتوى التعليمي لدورة (vocab500)
+ * 🔒 نظام الحماية والأمان المتقدم - منصة إتقان English (دورة 500 مفردة Vocab) © 2026
+ * تم التطوير لحماية المحتوى التعليمي ومنع الدخول غير المصرح به ومشاركة الحسابات.
  */
 
 (function () {
     'use strict';
 
     // =========================================================
-    // ⚙️ إعداد وتكوين مفتاح الكورس واتصال Supabase
+    // ⚙️ إعداد وتكوين اتصال Supabase
     // =========================================================
-    const CURRENT_COURSE_KEY = 'vocab500'; // 🔑 مفتاح الدورة في جدول user_courses
-
     const supabaseUrl = 'https://jacylpaxxgubvhofpuup.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY3lscGF4eGd1YnZob2ZwdXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjQwNzcsImV4cCI6MjA5ODUwMDA3N30.1AkiNkVi8uuJZgnwvRdKM_EF7RG5QjGE1if0ow0s6SU';
     let supabaseClient = null;
 
     // =========================================================
-    // 🛡️ دالة توليد بصمة الجهاز (Device Fingerprint)
+    // 🛡️ دالت توليد بصمة الجهاز (Device Fingerprint)
     // =========================================================
     const generateDeviceFingerprint = async () => {
         const navigatorInfo = window.navigator.userAgent + window.navigator.language;
@@ -33,7 +31,7 @@
         const currentDevice = await generateDeviceFingerprint();
         
         let { data: profile, error } = await supabaseClient
-            .from('profiles')
+            .from('profiles') // تأكدي أن اسم جدول المستخدمين لديكِ هو profiles أو عدليه هنا
             .select('current_device_id')
             .eq('id', userId)
             .single();
@@ -49,21 +47,20 @@
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            window.location.href = "/login.html";
+            window.location.href = "../login.html";
         }
     };
-
     // =========================================================
-    // 🚦 تشغيل حارس البوابة (التحقق من الدخول واشتراك vocab500)
+    // 🚦 تشغيل حارس البوابة (معدل لوضع التطوير والموقع الحي)
     // =========================================================
     const initAuthGuard = async () => {
-        // ✨ [ميزة المطور]: إذا كنتِ تعملين محلياً عبر Live Server، يتوقف الحارس للتعديل
+        // ✨ [ميزّة المطور]: إذا كنتِ تعملين محلياً عبر الـ Live Server، أوقفي الحرس فوراً وافتحي كورس الفوكاب للتعديل
         if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-            console.log("🛠️ وضع التطوير نشط: تم إيقاف الحماية مؤقتاً لتتمكني من تعديل الكورس بحرية.");
-            return;
+            console.log("🛠️ وضع التطوير نشط: تم إيقاف الحماية مؤقتاً لتتمكني من تعديل كورس الفوكاب بحرية.");
+            return; // الخروج من دالة الحماية فوراً والسماح لكِ بالدخول
         }
 
-        // انتظار تحميل مكتبة Supabase الخارجية
+        // انتظام انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
         while (!window.supabase) {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
@@ -71,49 +68,30 @@
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // [الحماية 1]: طرد غير المسجلين
+        // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
         if (!session || error) {
-            showUnauthorizedPage("يجب عليك تسجيل الدخول أولاً لتتمكن من تصفح المحتوى.");
-            setTimeout(() => { window.location.href = "/login.html"; }, 3000);
+            document.documentElement.innerHTML = `
+                <html dir="rtl">
+                <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
+                <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
+                    <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، الوصول غير مصرح به! 🛑</h2>
+                    <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في كورس الفوكاب أولاً لتتمكن من تصفح المحتوى.</p>
+                    <a href="../login.html" style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">الانتقال لصفحة تسجيل الدخول</a>
+                </body>
+                </html>
+            `;
+            setTimeout(() => { window.location.href = "../login.html"; }, 3000);
             return;
         }
 
+        // [الحماية 2]: التحقق من بصمة الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
-
-        // [الحماية 2]: التحقق من شراء الدورة المحددة (vocab500) في جدول user_courses
-        const { data: purchaseData, error: purchaseError } = await supabaseClient
-            .from('user_courses')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('course_key', CURRENT_COURSE_KEY)
-            .single();
-
-        if (purchaseError || !purchaseData) {
-            showUnauthorizedPage(`عذراً، أنت غير مشترك في دورة (${CURRENT_COURSE_KEY})! يرجى الشراء أولاً للوصول للمحتوى.`);
-            setTimeout(() => { window.location.href = "/index.html"; }, 3500);
-            return;
-        }
-
-        // [الحماية 3]: التحقق من بصمة الجهاز لمنع مشاركة الحسابات
         await enforceSingleSession(userId);
         
-        // فحص دوري كل 20 ثانية بالطرد اللحظي
+        // فحص دوري كل 20 ثانية بالطرد اللحظي الحي
         setInterval(async () => {
             await enforceSingleSession(userId);
         }, 20000);
-    };
-
-    const showUnauthorizedPage = (message) => {
-        document.documentElement.innerHTML = `
-            <html dir="rtl">
-            <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
-            <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-                <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، الوصول غير مصرح به! 🛑</h2>
-                <p style="color:#64748b; font-size:1.1rem;">${message}</p>
-                <a href="/index.html" style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">الانتقال للموقع الرئيسي</a>
-            </body>
-            </html>
-        `;
     };
 
     // تشغيل نظام التحقق
@@ -123,18 +101,18 @@
     // 🔒 وظائف الحماية القديمة (منع النسخ والـ Debugger)
     // =========================================================
     
-    // 1. تعطيل النقر الأيمن
+    // 1. تعطيل النقر الأيمن تماماً
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
     }, false);
 
-    // 2. حظر اختصارات لوحة المفاتيح
+    // 2. حظر اختصارات لوحة المفاتيح الحساسة
     document.addEventListener('keydown', function (e) {
         if (e.key === 'F12' || e.keyCode === 123) {
             e.preventDefault();
             return false;
         }
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j' || e.keyCode === 73 || e.keyCode === 74)) {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.keyCode === 73 || e.keyCode === 74)) {
             e.preventDefault();
             return false;
         }
@@ -152,7 +130,7 @@
         }
     }, false);
 
-    // 3. منع تحديد النصوص والنسخ
+    // 3. منع تحديد النصوص والنسخ برمجياً داخل المنصة
     document.addEventListener('selectstart', function (e) {
         e.preventDefault();
     }, false);
@@ -168,7 +146,7 @@
         }['constructor']('debugger')());
     }, 200);
 
-    // 5. حظر سحب وإفلات العناصر
+    // 5. حظر سحب وإفلات العناصر والصور
     document.addEventListener('dragstart', function (e) {
         e.preventDefault();
     }, false);
