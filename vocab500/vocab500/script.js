@@ -1,8 +1,7 @@
-
 // ==========================================
-// 1. طبقة حماية المحتوى ومنع التفتيش (Anti-Piracy)
+// 1. طبقة حماية محتوى كورس الفوكاب ومنع التفتيش (Vocab Anti-Piracy)
 // ==========================================
-const initCourseProtection = () => {
+const initVocabCourseProtection = () => {
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   window.addEventListener('keydown', (e) => {
@@ -22,8 +21,8 @@ const initCourseProtection = () => {
   }, 500);
 };
 
-// تشغيل الحماية فوراً
-initCourseProtection();
+// تشغيل حماية كورس الفوكاب فوراً عند تحميل الملف
+initVocabCourseProtection();
 
 
 const newWordsTips = [
