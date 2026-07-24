@@ -89,16 +89,6 @@ const slidesData = [
     description: "منهج تعليمي تفاعلي متكامل للمبتدئين للتأسيس وبناء لغة إنجليزية صحيحة وقوية"
   },
 
-  
-
-   // UNIT 1 VIDEO
-  {
-    id: "u1-video",
-    type: "video",
-    unit: 1,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
 
   // UNIT 1 INTRO
   {
@@ -737,15 +727,6 @@ const slidesData = [
 
 
 
-    // UNIT 2 VIDEO
-  {
-    id: "u2-video",
-    type: "video",
-    unit: 2,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
-
   // UNIT 2 INTRO
   {
     id: "u2-intro",
@@ -895,16 +876,6 @@ const slidesData = [
     }
   },
 
- 
-
-   // UNIT 3 VIDEO
-  {
-    id: "u3-video",
-    type: "video",
-    unit: 3,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
 
   // UNIT 3 INTRO
   {
@@ -1125,16 +1096,7 @@ const slidesData = [
     }
   },
 
- 
 
-   // UNIT 4 VIDEO
-  {
-    id: "u4-video",
-    type: "video",
-    unit: 4,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
 
   // UNIT 4 INTRO
   {
@@ -1342,16 +1304,7 @@ const slidesData = [
     }
   },
 
- 
 
-    // UNIT 5 VIDEO
-  {
-    id: "u5-video",
-    type: "video",
-    unit: 5,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
 
   // UNIT 5 INTRO
   {
@@ -1482,15 +1435,6 @@ const slidesData = [
   },
 
 
-
-   // UNIT 6 VIDEO
-  {
-    id: "u6-video",
-    type: "video",
-    unit: 6,
-    title: "مقدمة مرئية عن الوحدة",
-    videoUrl: "https://youtube.com/"
-  },
 
   // UNIT 6 INTRO
   {
