@@ -89,8 +89,6 @@
   <img src="../images/VocabularyIcon.png" class="skill-main-icon">
   <span data-i18n="section.Vocabulary"></span>
 </h2>
-
-
       <div class="skill-filters" id="vocab500-filters"></div>
       <div class="skill-grid" id="vocab500-grid"></div>
     </div>
@@ -243,19 +241,25 @@ const COURSE_VIEW_BASE = "course-view.html?id=";
 const SKILL_COURSES = {
   Foundation: {
     All: [
-      { key: "Foundation-Course", level: "Free", price: 59 },
-      { key: "vocab500", level: "A1", price: 79 }
+      { key: "english-foundation", level: "A1", price: 59 }
     ],
     Free: [
-      { key: "Foundation-Course", level: "Free", price: 59 }
+      { key: "english-foundation", level: "A1", price: 59 }
     ]
   },
-  Vocabulary: {
+
+  vocab500: {
     All: [
+      { key: "vocab500", level: "A1", price: 79 }
+    ],
+    "79": [
       { key: "vocab500", level: "A1", price: 79 }
     ]
   }
 };
+
+
+
 
 
 
@@ -295,36 +299,38 @@ async function renderCourses(){
       .map(c => {
         const isPurchased = userPurchasedKeys.includes(c.key);
         const cardHtml = renderCourseCard(c, lang, isPurchased);
-   if (isPurchased) {
-  return cardHtml.replace(
-    /href="[^"]*profile\.html[^"]*"/g,
-    `href="${getCoursePath(c.key)}"`
-  );
-}
 
+        if (isPurchased) {
+          return cardHtml.replace(
+            /href="[^"]*profile\.html[^"]*"/g,
+            `href="${getCoursePath(c.key)}"`
+          );
+        }
 
         return cardHtml;
       })
       .join('');
   }
-  
-  const LEVELS = {
-    Foundation: ["All", "Free"]
-  };
-  const SKILLS = ["Foundation"];
 
-  // نبني الفلاتر لكل مهارة
+  // 🔹 2) تعريف الفلاتر لكل قسم
+  const LEVELS = {
+    Foundation: ["All", "Free"],
+    vocab500: ["All", "79"]
+  };
+
+  // 🔹 3) الأقسام الموجودة في الصفحة
+  const SKILLS = ["Foundation", "vocab500"];
+
+  // 🔹 4) بناء الفلاتر لكل قسم
   SKILLS.forEach(skill => {
     const filterEl = document.getElementById(`${skill.toLowerCase()}-filters`);
     if (filterEl) {
       filterEl.innerHTML = LEVELS[skill].map(level => {
         let label = level;
-        if(level === "All") label = t("filter.all");
-        else if(level === "Free") label = t("filter.free");
-        else if(level.startsWith("+")){
-          const num = level.replace("+","");
-          label = getLang() === "ar" ? "+" + num.replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : level;
-        }
+
+        if (level === "All") label = t("filter.all");
+        else if (level === "Free") label = t("filter.free");
+        else if (level === "79") label = t("filter.vocab79");
 
         return `
           <button class="filter-btn" onclick="setActiveFilter(this, '${skill}', '${level}')">
@@ -334,9 +340,11 @@ async function renderCourses(){
       }).join('');
     }
 
+    // 🔹 5) عرض الكروت الافتراضية لكل قسم
     renderSkill(skill, "All");
   });
 }
+
 
 function setActiveFilter(btn, skill, level){
   document.querySelectorAll(`#${skill.toLowerCase()}-filters .filter-btn`)
@@ -345,6 +353,8 @@ function setActiveFilter(btn, skill, level){
   btn.classList.add('active-filter');
   renderSkill(skill, level);
 }
+
+
 
 function formatNumber(num){
   const lang = getLang();
@@ -356,60 +366,62 @@ function formatNumber(num){
 
 function renderSkill(skill, level){
   const courses = SKILL_COURSES[skill][level];
+  if (!courses) return; // حماية من الانهيار
 
   const courseCards = courses.map((c) => {
-    // جلب بيانات الكورس بالكامل وديناميكياً من COURSES الموحدة في app.js لمنع اختفاء العربي
-    const fullCourse = typeof COURSES !== 'undefined' ? COURSES.find(item => item.key === c.key) : null;
-    
-const courseTitle = fullCourse 
-  ? fullCourse.title[getLang()] 
-  : t(`course.foundation.title`);
+
+    const fullCourse = COURSES.find(item => item.key === c.key);
+
+    const courseTitle = fullCourse 
+      ? fullCourse.title[getLang()] 
+      : "";
 
     const courseDesc = fullCourse 
-  ? fullCourse.description[getLang()] 
-  : t(`course.foundation.desc`);
+      ? fullCourse.description[getLang()] 
+      : "";
 
     const courseLessons = fullCourse
-  ? (c.key === "vocab500"
-      ? (getLang() === 'ar' ? "14 وحدة" : "14 Units")
-      : `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}`)
-  : (skill.toLowerCase() === "foundation"
-    ? t("course.foundation.lessons")
-    : "6 Units");
+      ? (
+          c.key === "vocab500"
+            ? (getLang() === 'ar' ? "14 وحدة" : "14 Units")
+            : `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}`
+        )
+      : "";
 
-
-    const coursePrice = fullCourse ? fullCourse.price[getLang()] : "59";
+    const coursePrice = fullCourse ? fullCourse.price[getLang()] : "";
 
     return `
-    <article class="card" style="display:flex;flex-direction:column">
-      <div class="flex items-center gap-2">
-        <span class="lvl-pill lvl-pill-sm">
-          ${c.level === "Free" ? "A1" : c.level.startsWith("+") ? "+" + formatNumber(c.level.replace("+","")) : c.level}
-        </span>
-      </div>
+      <article class="card" style="display:flex;flex-direction:column">
+        <div class="flex items-center gap-2">
+          <span class="lvl-pill lvl-pill-sm">${c.level}</span>
+        </div>
 
-      <h3 class="text-lg font-semibold mt-3">${courseTitle}</h3>
+        <h3 class="text-lg font-semibold mt-3">${courseTitle}</h3>
 
-      <p class="muted text-sm mt-2">${courseDesc}</p>
+        <p class="muted text-sm mt-2">${courseDesc}</p>
 
-      <div class="mt-4 flex items-center gap-4 muted text-xs">
-        <span>📖 ${courseLessons}</span>
-      </div>
+        <div class="mt-4 flex items-center gap-4 muted text-xs">
+          <span>📖 ${courseLessons}</span>
+        </div>
 
-      <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
-        <span class="font-bold">
-          <img src="../images/SARIcon.png" alt="SAR" class="currency-icon"> ${formatNumber(coursePrice)}
-        </span>
-        <a href="#" class="text-primary text-sm font-semibold course-details-trigger" data-course-key="${c.key}">
-          ${t("courses.details")} →
-        </a>
-      </div>
-    </article>
-  `}).join('');
+        <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
+          <span class="font-bold">
+            <img src="../images/SARIcon.png" alt="SAR" class="currency-icon">
+            ${formatNumber(coursePrice)}
+          </span>
+
+          <a href="#" class="text-primary text-sm font-semibold course-details-trigger" data-course-key="${c.key}">
+            ${t("courses.details")} →
+          </a>
+        </div>
+      </article>
+    `;
+  }).join('');
 
   const gridEl = document.getElementById(`${skill.toLowerCase()}-grid`);
   if (gridEl) gridEl.innerHTML = courseCards;
 }
+
 
 function getFoundationModalContent(lang){
   if(lang === 'ar'){
@@ -644,21 +656,20 @@ function closeVocab500Modal(){
   document.body.style.overflow = '';
 }
 
-
-
 document.addEventListener('click', function(event){
   const trigger = event.target.closest('.course-details-trigger');
 if(trigger){
     event.preventDefault();
     const key = trigger.dataset.courseKey;
 
-    if(key === 'Foundation-Course'){
-      openFoundationModal();
-    }
+   if(key === 'english-foundation'){
+  openFoundationModal();
+}
 
-    if(key === 'vocab500'){
-      openVocab500Modal();
-    }
+if(key === 'vocab500'){
+  openVocab500Modal();
+}
+
 
     return;
 }
