@@ -61,12 +61,18 @@
     <p class="lead" style="margin:1.25rem auto 0;max-width:36rem" data-i18n="courses.subtitle"></p>
   </div>
 </section>
+
 <main class="container" style="padding:4rem 1.5rem">
-  <div class="flex items-center gap-2 mb-6"><span style="color:var(--primary)">★</span><h2 class="text-2xl font-bold" data-i18n="courses.featured"></h2></div>
+  <div class="flex items-center gap-2 mb-6">
+    <span style="color:var(--primary)">★</span>
+    <h2 class="text-2xl font-bold" data-i18n="courses.featured"></h2>
+  </div>
+
   <div id="featured" class="grid grid-2"></div>
 
-    <div id="skills-container">
+  <div id="skills-container">
 
+    <!-- قسم Foundation -->
     <div class="skill-block" data-skill="Foundation">
       <h2 class="skill-title">
         <img src="../images/FoundationIcon.png" class="skill-main-icon">
@@ -75,32 +81,72 @@
 
       <div class="skill-filters" id="foundation-filters"></div>
       <div class="skill-grid" id="foundation-grid"></div>
-
-      
     </div>
 
-  <div class="card card-lg text-center" style="margin-top:5rem;padding:2.5rem">
+    <!-- قسم vocab500 -->
+    <div class="skill-block" data-skill="vocab500">
+      <h2 class="skill-title">
+        <img src="../images/Vocab500Icon.png" class="skill-main-icon">
+        <span>Vocabulary 500</span>
+      </h2>
 
+      <div class="skill-filters" id="vocab500-filters"></div>
+      <div class="skill-grid" id="vocab500-grid"></div>
+    </div>
+
+  </div>
+
+  <div class="card card-lg text-center" style="margin-top:5rem;padding:2.5rem">
     <h3 class="h2" data-i18n="courses.cta.title"></h3>
     <p class="muted mt-3" style="max-width:28rem;margin-left:auto;margin-right:auto" data-i18n="courses.cta.desc"></p>
-    <a href="test.html" class="cta cta-lg mt-6"><span data-i18n="courses.cta.button"></span> →</a>
+    <a href="test.html" class="cta cta-lg mt-6">
+      <span data-i18n="courses.cta.button"></span> →
+    </a>
   </div>
 </main>
 
+
+<!-- نافذة vocab500 -->
+<div id="vocab500-modal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-overlay" id="vocab500-modal-overlay"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="vocab500-modal-title">
+    <div class="modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
+      <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة Foundation -->
+<div id="foundation-modal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-overlay" id="foundation-modal-overlay"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="foundation-modal-title">
+    <div class="modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
+      <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- نافذة Foundation -->
 <div id="foundation-modal" class="modal-backdrop hidden" aria-hidden="true">
   <div class="modal-overlay" id="foundation-modal-overlay"></div>
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="foundation-modal-title">
     <div class="modal-body">
-      <!-- foundation content is rendered dynamically based on language -->
+      <!-- foundation content is rendered dynamically -->
     </div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
-        <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
-      </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary modal-close-btn">إغلاق</button>
+      <button type="button" class="cta modal-primary-btn">سجّل الآن</button>
     </div>
   </div>
 </div>
+
+
+
 
 <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
 
@@ -191,18 +237,26 @@ let userPurchasedKeys = [];
 let isLoggedIn = false;
 
 // المسار الموحد والثابت لفتح محتوى الدورة بعد الشراء
-const COURSE_VIEW_URL = "course-view.html?id=english-foundation";
+const COURSE_VIEW_BASE = "course-view.html?id=";
 
 const SKILL_COURSES = {
   Foundation: {
     All: [
-      { key: "english-foundation", level: "Free", price: 59 }
+      { key: "Foundation-Course", level: "Free", price: 59 },
+      { key: "vocab500", level: "A1", price: 79 }
     ],
     Free: [
-      { key: "english-foundation", level: "Free", price: 59 }
+      { key: "Foundation-Course", level: "Free", price: 59 }
+    ]
+  },
+  Vocabulary: {
+    All: [
+      { key: "vocab500", level: "A1", price: 79 }
     ]
   }
 };
+
+
 
 async function checkUserStatus() {
   if (window.supabaseClient) {
@@ -240,9 +294,14 @@ async function renderCourses(){
       .map(c => {
         const isPurchased = userPurchasedKeys.includes(c.key);
         const cardHtml = renderCourseCard(c, lang, isPurchased);
-        if (isPurchased) {
-          return cardHtml.replace(/href="[^"]*profile\.html[^"]*"/g, `href="${COURSE_VIEW_URL}"`);
-        }
+   if (isPurchased) {
+  return cardHtml.replace(
+    /href="[^"]*profile\.html[^"]*"/g,
+    `href="${getCoursePath(c.key)}"`
+  );
+}
+
+
         return cardHtml;
       })
       .join('');
@@ -450,13 +509,119 @@ function closeFoundationModal(){
   document.body.style.overflow = '';
 }
 
+function renderVocab500Modal(){
+  const lang = getLang();
+  const modalBody = document.querySelector('#vocab500-modal .modal-body');
+  const actions = document.querySelector('#vocab500-modal .modal-actions');
+
+  if(modalBody) modalBody.innerHTML = getVocab500ModalContent(lang);
+
+  if(actions){
+    const isPurchased = userPurchasedKeys.includes('vocab500');
+
+    const primaryBtn = isPurchased
+      ? `<button type="button" class="cta modal-primary-btn" onclick="window.location.href='../vocab500/vocab500/index.html'">${lang === 'ar' ? 'فتح الدورة ←' : 'Open Course ←'}</button>`
+      : `<button type="button" class="cta modal-primary-btn" onclick="handleRegistrationAction('vocab500')">${lang === 'ar' ? 'سجّل الآن' : 'Register Now'}</button>`;
+
+    actions.innerHTML = `
+      <button type="button" class="btn-secondary modal-close-btn">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
+      ${primaryBtn}
+    `;
+  }
+}
+
+
+function getVocab500ModalContent(lang){
+  if(lang === 'ar'){
+    return `
+      <h2 id="vocab500-modal-title">أولاً: عن الدورة (في سطور)</h2>
+      <p>احفظ أهم 500 كلمة لمستوى A1 بطريقة تفاعلية ممتعة وسهلة، مع تمارين تطبيقية وصوتيات لكل كلمة.</p>
+
+      <h3>ثانياً: محتوى الدورة (ماذا ستتعلم؟)</h3>
+      <div class="modal-list">
+        <p><strong>الوحدة 1 | كلمات الحياة اليومية:</strong> أهم الكلمات المستخدمة يوميًا.</p>
+        <p><strong>الوحدة 2 | كلمات الأماكن:</strong> كلمات الأماكن الشائعة في الحياة.</p>
+        <p><strong>الوحدة 3 | كلمات الأشخاص:</strong> مفردات الأشخاص والعلاقات.</p>
+        <p><strong>الوحدة 4 | كلمات الأشياء:</strong> مفردات الأشياء الأكثر استخدامًا.</p>
+        <p><strong>الوحدة 5 | كلمات الأفعال:</strong> أهم الأفعال الأساسية للمستوى الأول.</p>
+        <p><strong>الوحدة 6 | مراجعة وتطبيق:</strong> تمارين تفاعلية لاختبار حفظ الكلمات.</p>
+      </div>
+
+      <h3>ثالثاً: الميزات التفاعلية</h3>
+      <div class="modal-list">
+        <p><strong>نطق صوتي لكل كلمة:</strong> استمع للنطق الصحيح فورًا.</p>
+        <p><strong>تمارين حفظ:</strong> اختبارات قصيرة بعد كل مجموعة كلمات.</p>
+        <p><strong>اختبار نهائي:</strong> يقيس مدى حفظك للـ 500 كلمة.</p>
+      </div>
+    `;
+  }
+
+  return `
+      <h2 id="vocab500-modal-title">About the Course</h2>
+      <p>Master the most essential 500 A1 words through interactive practice, audio pronunciation, and smart review activities.</p>
+
+      <h3>Course Content</h3>
+      <div class="modal-list">
+        <p><strong>Unit 1 | Daily Life Words</strong></p>
+        <p><strong>Unit 2 | Places Vocabulary</strong></p>
+        <p><strong>Unit 3 | People Vocabulary</strong></p>
+        <p><strong>Unit 4 | Objects Vocabulary</strong></p>
+        <p><strong>Unit 5 | Basic Verbs</strong></p>
+        <p><strong>Unit 6 | Review & Practice</strong></p>
+      </div>
+
+      <h3>Interactive Features</h3>
+      <div class="modal-list">
+        <p><strong>Audio Pronunciation:</strong> Listen to every word.</p>
+        <p><strong>Practice Activities:</strong> Short quizzes after each unit.</p>
+        <p><strong>Final Exam:</strong> Test your mastery of all 500 words.</p>
+      </div>
+    `;
+}
+
+
+
+
+
+function openVocab500Modal(event){
+  if(event) event.preventDefault();
+  const modal = document.getElementById('vocab500-modal');
+  if(!modal) return;
+  renderVocab500Modal();
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+}
+
+
+
+function closeVocab500Modal(){
+  const modal = document.getElementById('vocab500-modal');
+  if(!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+
+
+
 document.addEventListener('click', function(event){
   const trigger = event.target.closest('.course-details-trigger');
-  if(trigger){
+if(trigger){
     event.preventDefault();
-    openFoundationModal();
+    const key = trigger.dataset.courseKey;
+
+    if(key === 'Foundation-Course'){
+      openFoundationModal();
+    }
+
+    if(key === 'vocab500'){
+      openVocab500Modal();
+    }
+
     return;
-  }
+}
+
   if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
     closeFoundationModal();
   }
@@ -471,7 +636,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   await renderCourses();
   applyLang();
 });
+
 </script>
+
+
 
 
 </body></html>
