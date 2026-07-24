@@ -186,7 +186,6 @@ const DICT = {
     "results.retake":"أعد الاختبار",
     "results.home":"العودة للرئيسية",
     "section.Grammar":"قواعد",
-    "section.Vocabulary":"مفردات",
     "section.Reading":"قراءة",
     "section.Listening":"استماع",
     "lang.toggle":"English",
@@ -216,7 +215,7 @@ const DICT = {
     "courses.viewLess": "عرض أقل",
     "section.Foundation": "الدورة التأسيسية",
 "section.Grammar": "قواعد",
-"section.Vocabulary": "مفردات",
+"section.Vocabulary": "المفردات",
 "section.Reading": "قراءة",
 "section.Listening": "استماع",
 "section.Writing": "كتابة",
@@ -459,7 +458,14 @@ const actionButton = isPurchased
       <p class="muted text-sm mt-2">${c.description[lang]}</p>
 
       <div class="mt-4 flex items-center gap-4 muted text-xs">
-        <span>📖 ${formatNumber(c.lessons)} ${t("courses.lessons")}</span>
+        <span>
+  📖 ${
+    c.key === "vocab500"
+      ? (lang === "ar" ? "14 وحدة" : "14 Units")
+      : `${formatNumber(c.lessons)} ${t("courses.lessons")}`
+  }
+</span>
+
       </div>
 
       <div class="mt-5 flex items-center justify-between" style="border-top:1px solid var(--border);padding-top:1rem">
@@ -716,7 +722,7 @@ const COURSES = [
     key: "vocab500",
     title: {
       en: "Vocabulary 500 Course",
-      ar: "كورس ال 500 كلمة للمستوى الأول"
+      ar: "كورس 500 كلمة للمستوى الأول"
     },
     description: {
       en: "Master the most essential 500 A1 words through interactive practice and audio pronunciation.",
