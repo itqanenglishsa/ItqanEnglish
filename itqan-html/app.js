@@ -442,8 +442,10 @@ function renderCourseCard(c, lang, isPurchased = false) {
  
 // التعديل: جعل زر الكارت يستدعي handleRegistrationAction بدلاً من goToSalla مباشرة
 const actionButton = isPurchased
-  ? `<a href="../Foundation-Course/foundation-course/index.html" class="cta text-sm font-semibold">${buttonText}</a>`
+  ? `<a href="${getCoursePath(c.key)}" class="cta text-sm font-semibold">${buttonText}</a>`
   : `<a href="#" onclick="handleRegistrationAction('${c.key}')" class="cta text-sm font-semibold">${buttonText}</a>`;
+
+
 
   return `
     <article class="card" style="background:var(--card);color:var(--foreground)">
@@ -471,6 +473,7 @@ const actionButton = isPurchased
     </article>
   `;
 }
+
 const QUESTIONS = [
 
   // -------------------------
@@ -677,10 +680,11 @@ const QUESTIONS = [
 }
 
 ];
+
 const COURSES = [
   {
-    id: "english-foundation", // 🟢 تم التحديث ليتوافق مع سوبابيز
-    key: "english-foundation", // 🟢 تم التحديث ليتوافق مع سوبابيز
+    id: "english-foundation",
+    key: "english-foundation",
     title: {
       en: "Foundation Course",
       ar: "الدورة التأسيسية"
@@ -704,8 +708,39 @@ const COURSES = [
       ar: "٥٩"
     },
     featured: true
+  },
+
+  // ⭐⭐⭐ إضافة دورة الـ 500 كلمة ⭐⭐⭐
+  {
+    id: "vocab500",
+    key: "vocab500",
+    title: {
+      en: "Vocabulary 500 Course",
+      ar: "كورس ال 500 كلمة للمستوى الأول"
+    },
+    description: {
+      en: "Master the most essential 500 A1 words through interactive practice and audio pronunciation.",
+      ar: "احفظ أهم 500 كلمة لمستوى A1 بطريقة تفاعلية ممتعة مع نطق صوتي وتمارين تطبيقية."
+    },
+    level: "A1",
+    category: {
+      en: "Vocabulary",
+      ar: "مفردات"
+    },
+    duration: {
+      en: "4 weeks",
+      ar: "٤ أسابيع"
+    },
+    lessons: 6, // يمكنك تغييره حسب الدورة
+    price: {
+      en: "79",
+      ar: "٧٩"
+    },
+    featured: true // اجعليها true إذا أردتِ ظهورها في قسم Featured
   }
 ];
+
+
 const LEVEL_DESCRIPTIONS = {
   A1:{
     title:{
@@ -1402,3 +1437,14 @@ function popAttachLoginEvents() {
     };
   }
 }
+
+function getCoursePath(courseKey) {
+  if (courseKey === "english-foundation") {
+    return "../Foundation-Course/foundation-course/index.html";
+  }
+  if (courseKey === "vocab500") {
+    return "../vocab500/vocab500/index.html";
+  }
+  return "#";
+}
+
