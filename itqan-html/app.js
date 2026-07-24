@@ -115,6 +115,7 @@ const DICT = {
 "profile.courses": "My Courses",
 "profile.empty": "You haven’t purchased any course yet",
 "profile.notRegistered": "Not registered",
+"filter.vocab79": "<img src='../images/SARIcon.png' class='currency-icon'> 79",
 
 
   
@@ -418,6 +419,7 @@ const DICT = {
 "profile.courses": "كورساتي",
 "profile.empty": "لم تشترِ أي كورس بعد",
 "profile.notRegistered": "غير مسجل",
+"filter.vocab79": "<img src='../images/SARIcon.png' class='currency-icon'> ٧٩",
 
 
   }
