@@ -86,9 +86,10 @@
     <!-- قسم vocab500 -->
     <div class="skill-block" data-skill="vocab500">
       <h2 class="skill-title">
-        <img src="../images/Vocab500Icon.png" class="skill-main-icon">
-        <span>Vocabulary 500</span>
-      </h2>
+  <img src="../images/VocabularyIcon.png" class="skill-main-icon">
+  <span data-i18n="section.Vocabulary"></span>
+</h2>
+
 
       <div class="skill-filters" id="vocab500-filters"></div>
       <div class="skill-grid" id="vocab500-grid"></div>
@@ -360,9 +361,23 @@ function renderSkill(skill, level){
     // جلب بيانات الكورس بالكامل وديناميكياً من COURSES الموحدة في app.js لمنع اختفاء العربي
     const fullCourse = typeof COURSES !== 'undefined' ? COURSES.find(item => item.key === c.key) : null;
     
-    const courseTitle = fullCourse ? fullCourse.title[getLang()] : (t(`skill.${c.key}.title`) !== `skill.${c.key}.title` ? t(`skill.${c.key}.title`) : c.key);
-    const courseDesc = fullCourse ? fullCourse.description[getLang()] : "A fun and interactive journey to learn English from scratch with clear, simple steps for everyone.";
-    const courseLessons = fullCourse ? `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}` : "6 Units";
+const courseTitle = fullCourse 
+  ? fullCourse.title[getLang()] 
+  : t(`course.foundation.title`);
+
+    const courseDesc = fullCourse 
+  ? fullCourse.description[getLang()] 
+  : t(`course.foundation.desc`);
+
+    const courseLessons = fullCourse
+  ? (c.key === "vocab500"
+      ? (getLang() === 'ar' ? "14 وحدة" : "14 Units")
+      : `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}`)
+  : (skill.toLowerCase() === "foundation"
+    ? t("course.foundation.lessons")
+    : "6 Units");
+
+
     const coursePrice = fullCourse ? fullCourse.price[getLang()] : "59";
 
     return `
@@ -535,51 +550,77 @@ function getVocab500ModalContent(lang){
   if(lang === 'ar'){
     return `
       <h2 id="vocab500-modal-title">أولاً: عن الدورة (في سطور)</h2>
-      <p>احفظ أهم 500 كلمة لمستوى A1 بطريقة تفاعلية ممتعة وسهلة، مع تمارين تطبيقية وصوتيات لكل كلمة.</p>
+      <p>
+        انطلق في رحلة إتقان أهم مفردات اللغة الإنجليزية اليومية بثقة.. من الصفر وحتى بناء حصيلة لغوية قوية!
+        التجربة التعليمية الأكثر تفاعلية على الإطلاق لإتقان 500 كلمة أساسية في المستوى A1، حيث تتعلم الكلمات الأكثر استخدامًا في الحياة اليومية بطريقة ممتعة وعملية.
+      </p>
 
       <h3>ثانياً: محتوى الدورة (ماذا ستتعلم؟)</h3>
       <div class="modal-list">
-        <p><strong>الوحدة 1 | كلمات الحياة اليومية:</strong> أهم الكلمات المستخدمة يوميًا.</p>
-        <p><strong>الوحدة 2 | كلمات الأماكن:</strong> كلمات الأماكن الشائعة في الحياة.</p>
-        <p><strong>الوحدة 3 | كلمات الأشخاص:</strong> مفردات الأشخاص والعلاقات.</p>
-        <p><strong>الوحدة 4 | كلمات الأشياء:</strong> مفردات الأشياء الأكثر استخدامًا.</p>
-        <p><strong>الوحدة 5 | كلمات الأفعال:</strong> أهم الأفعال الأساسية للمستوى الأول.</p>
-        <p><strong>الوحدة 6 | مراجعة وتطبيق:</strong> تمارين تفاعلية لاختبار حفظ الكلمات.</p>
+        <p><strong>القسم 1 – القسم 14 | 500 كلمة أساسية:</strong> تتكون الدورة من 14 قسمًا، ويحتوي كل قسم على 30 إلى 40 كلمة مختارة بعناية من أكثر الكلمات استخدامًا في اللغة الإنجليزية.</p>
+
+        <p>ستتعلم في كل قسم:</p>
+        <p>• معنى كل كلمة باللغة العربية.</p>
+        <p>• النطق الصحيح لكل كلمة.</p>
+        <p>• أمثلة بسيطة توضح طريقة استخدامها.</p>
+        <p>• كيفية تمييز الكلمات واستخدامها في الحياة اليومية.</p>
       </div>
 
-      <h3>ثالثاً: الميزات التفاعلية</h3>
+      <h3>ثالثاً: الميزات التفاعلية (سر تميّز الدورة)</h3>
       <div class="modal-list">
-        <p><strong>نطق صوتي لكل كلمة:</strong> استمع للنطق الصحيح فورًا.</p>
-        <p><strong>تمارين حفظ:</strong> اختبارات قصيرة بعد كل مجموعة كلمات.</p>
-        <p><strong>اختبار نهائي:</strong> يقيس مدى حفظك للـ 500 كلمة.</p>
+        <p><strong>شرح مبسط لكل كلمة:</strong> لا تحفظ الكلمات بشكل عشوائي! ستتعلم معنى كل مفردة بطريقة واضحة وسهلة مع أمثلة تساعدك على فهم استخدامها الحقيقي.</p>
+
+        <p><strong>نظام صوتي تفاعلي:</strong> استمع إلى النطق الصحيح لكل كلمة بضغطة واحدة، ثم كررها حتى تتقن النطق بثقة.</p>
+
+        <p><strong>شريط تقدم ذكي:</strong> تابع تقدمك في كل قسم لحظة بلحظة، واعرف نسبة إنجازك حتى تصل إلى إكمال الدورة بالكامل.</p>
+
+        <p><strong>المعلم الذكي (Chat Bot):</strong> إذا احتجت إلى فهم أعمق لأي كلمة، يمكنك سؤال المعلم الذكي ليقدم لك شروحات إضافية، وأمثلة، ونصائح تساعدك على ترسيخ المفردات.</p>
+
+        <p><strong>مؤلف القصص:</strong> أنشئ قصصًا قصيرة باستخدام الكلمات التي تعلمتها، لتشاهدها في سياقات مختلفة وتتعلم استخدامها بطريقة طبيعية وسهلة التذكر.</p>
+
+        <p><strong>اختبار قصير في كل قسم:</strong> أثناء التعلُّم في الأقسام، ستجد اختبارًا تفاعليًا يقيس مدى استيعابك للمفردات.</p>
+
+        <p><strong>نظام نقاط الخبرة (XP):</strong> احصل على نقاط خبرة أثناء التعلم، وإكمال الاختبارات، واستخدام الميزات التفاعلية، لتجعل رحلتك التعليمية أكثر تحفيزًا ومتعة.</p>
       </div>
     `;
   }
 
   return `
-      <h2 id="vocab500-modal-title">About the Course</h2>
-      <p>Master the most essential 500 A1 words through interactive practice, audio pronunciation, and smart review activities.</p>
+      <h2 id="vocab500-modal-title">First: About the Course</h2>
+      <p>
+        Start your journey toward mastering the most essential everyday English vocabulary with confidence—from absolute beginner to building a strong vocabulary foundation!
+        This course offers one of the most interactive learning experiences for mastering 500 essential A1-level English words. You’ll learn the most frequently used vocabulary in daily life through a fun, practical, and engaging approach.
+      </p>
 
-      <h3>Course Content</h3>
+      <h3>Second: Course Content (What Will You Learn?)</h3>
       <div class="modal-list">
-        <p><strong>Unit 1 | Daily Life Words</strong></p>
-        <p><strong>Unit 2 | Places Vocabulary</strong></p>
-        <p><strong>Unit 3 | People Vocabulary</strong></p>
-        <p><strong>Unit 4 | Objects Vocabulary</strong></p>
-        <p><strong>Unit 5 | Basic Verbs</strong></p>
-        <p><strong>Unit 6 | Review & Practice</strong></p>
+        <p><strong>Sections 1–14 | 500 Essential Words:</strong> The course consists of 14 sections, with each section containing 30–40 carefully selected words chosen from the most commonly used vocabulary in English.</p>
+
+        <p>You will learn in every section:</p>
+        <p>• The Arabic meaning of each word.</p>
+        <p>• The correct pronunciation of every word.</p>
+        <p>• Simple examples that demonstrate how the word is used.</p>
+        <p>• How to recognize and use the vocabulary naturally in everyday situations.</p>
       </div>
 
-      <h3>Interactive Features</h3>
+      <h3>Third: Interactive Features (What Makes This Course Unique?)</h3>
       <div class="modal-list">
-        <p><strong>Audio Pronunciation:</strong> Listen to every word.</p>
-        <p><strong>Practice Activities:</strong> Short quizzes after each unit.</p>
-        <p><strong>Final Exam:</strong> Test your mastery of all 500 words.</p>
+        <p><strong>Simple Word Explanations:</strong> Don’t just memorize words! Understand the meaning of every vocabulary item through clear explanations and practical examples that show how it’s used in real life.</p>
+
+        <p><strong>Interactive Audio System:</strong> Listen to the correct pronunciation of every word with a single click, then practice repeating it until you can pronounce it confidently.</p>
+
+        <p><strong>Smart Progress Tracker:</strong> Monitor your learning progress in every section in real time and keep track of your completion percentage as you work toward finishing the entire course.</p>
+
+        <p><strong>AI Tutor (Chatbot):</strong> Need a deeper explanation? Ask the AI Tutor for additional explanations, examples, and helpful tips that reinforce your understanding and help you remember new vocabulary more effectively.</p>
+
+        <p><strong>Story Composer:</strong> Create short stories using the words you’ve learned to see them in different contexts and develop a more natural, long-lasting understanding of the vocabulary.</p>
+
+        <p><strong>Section Quizzes:</strong> Each section includes a short interactive quiz to help you assess your understanding and reinforce the vocabulary you’ve learned.</p>
+
+        <p><strong>XP (Experience Points) System:</strong> Earn experience points by learning new words, completing quizzes, and using the interactive features—making your learning journey more motivating, rewarding, and enjoyable.</p>
       </div>
     `;
 }
-
-
 
 
 
@@ -622,9 +663,24 @@ if(trigger){
     return;
 }
 
-  if(event.target.closest('.modal-close-btn') || event.target.id === 'foundation-modal-overlay'){
+// إغلاق نافذة Foundation
+if(event.target.closest('.modal-close-btn') && event.target.closest('#foundation-modal')){
     closeFoundationModal();
-  }
+}
+
+// إغلاق نافذة vocab500
+if(event.target.closest('.modal-close-btn') && event.target.closest('#vocab500-modal')){
+    closeVocab500Modal();
+}
+
+// إغلاق عبر الخلفية (overlay)
+if(event.target.id === 'foundation-modal-overlay'){
+    closeFoundationModal();
+}
+if(event.target.id === 'vocab500-modal-overlay'){
+    closeVocab500Modal();
+}
+
 });
 
 document.addEventListener('keydown', function(event){
