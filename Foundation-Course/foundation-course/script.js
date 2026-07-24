@@ -355,23 +355,6 @@ if (voices.length > 0) {
       
         
 
-           case "video":
-        htmlContent = `
-          <div class="video-slide-content">
-            <div class="video-slide-icon">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
-            <span class="intro-tag">مقطع فيديو</span>
-            <h2 class="intro-title" style="text-align:center;">${slide.title}</h2>
-            <p class="intro-desc" style="text-align:center; max-width:520px;">قبل البدء بالوحدة، شاهد هذا المقطع التوضيحي القصير.</p>
-                                                <video controls style="width:100%; max-width:640px; height:260px; object-fit:cover; border-radius:16px; margin-top:8px;">
-              <source src="VideoUnitOne.mp4" type="video/mp4">
-            </video>
-
-
-          </div>
-        `;
-        break;
 
       case "intro":
         htmlContent = `
