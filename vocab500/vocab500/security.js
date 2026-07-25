@@ -16,7 +16,6 @@
     // =========================================================
     // 🛡️ دالة توليد معرف الجهاز المستقر (Device ID)
     // =========================================================
-    // تم تحسينها لتعطي معرف ثابت للجهاز بدلاً من البصمة المتغيرة
     const getDeviceId = () => {
         let deviceId = localStorage.getItem('itqan_device_id');
         if (!deviceId) {
@@ -52,7 +51,7 @@
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
+            window.location.replace("https://itqanenglishsa.github.io/ItqanEnglish/no-access.html");
         }
     };
 
@@ -60,9 +59,6 @@
     // 🚦 تشغيل حارس البوابة
     // =========================================================
     const initAuthGuard = async () => {
-        // [ملاحظة]: إذا أردت تفعيل وضع التطوير محلياً يمكنك فك التعليق عن السطر التالي بنفسك عند التعديل
-        // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
-
         // انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
         let attempts = 0;
         while (!window.supabase && attempts < 100) {
@@ -78,16 +74,19 @@
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // [الحماية 1]: إعادة توجيه غير المشتركين تلقائياً لصفحة الدخول
+        // [الحماية 1]: إعادة توجيه غير المشتركين فوراً لصفحة عدم المصادقة
         if (!session || error) {
-            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
+            window.location.replace("https://itqanenglishsa.github.io/ItqanEnglish/no-access.html");
             return;
         }
 
         // [الحماية 2]: التحقق من الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
         await enforceSingleSession(userId);
-        
+
+        // ✅ إظهار محتوى الكورس فقط بعد النجاح في جميع الفحوصات الأمنية
+        document.body.style.setProperty('display', 'block', 'important');
+
         // فحص دوري كل 20 ثانية
         setInterval(async () => {
             await enforceSingleSession(userId);
