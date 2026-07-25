@@ -70,13 +70,19 @@
 
         // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
      
-if (!session || error) {
+      if (!session || error) {
     document.documentElement.innerHTML = `
         <html dir="rtl">
         <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
         <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-            <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي ولو أبوك اللواء! 🛑</h2>
-            <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
+           <!-- 🖼️ صورة أعلى رسالة الحماية -->
+<img src="forfun.PNG" 
+     alt="Access Denied"
+     style="width:180px; margin-bottom:20px; border-radius:12px;">
+
+<h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي ولو أبوك اللواء! 🛑</h2>
+<p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
+
 
             <!-- 🔗 زر الانتقال إلى الصفحة الرئيسية في GitHub Pages -->
             <a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
