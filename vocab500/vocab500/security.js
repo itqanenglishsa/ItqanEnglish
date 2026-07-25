@@ -70,6 +70,7 @@
 
         // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
      
+       
       if (!session || error) {
     document.documentElement.innerHTML = `
         <html dir="rtl">
@@ -80,7 +81,7 @@
      alt="Access Denied"
      style="width:180px; margin-bottom:20px; border-radius:12px;">
 
-<h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي ولو أبوك اللواء! 🛑</h2>
+<h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي لو أبوك اللواء! 🛑</h2>
 <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
 
 
