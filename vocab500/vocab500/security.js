@@ -52,7 +52,7 @@
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
+            window.location.replace("access-denied.html");
         }
     };
 
@@ -78,11 +78,11 @@
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // [الحماية 1]: إعادة توجيه غير المشتركين تلقائياً لصفحة الدخول
-        if (!session || error) {
-            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
-            return;
-        }
+       // [الحماية 1]: تحويل غير المشتركين إلى صفحة منع الوصول
+if (!session || error) {
+    window.location.replace("access-denied.html");
+    return;
+}
 
         // [الحماية 2]: التحقق من الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
