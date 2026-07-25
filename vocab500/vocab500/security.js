@@ -79,10 +79,11 @@ if (!session || error) {
             <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في كورس الفوكاب أولاً لتتمكن من تصفح المحتوى.</p>
 
             <!-- 🔗 زر الانتقال لصفحة الموقع الأساسية -->
-            <a href="../index.html" 
-               style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
-               الانتقال لصفحة تسجيل الدخول
-            </a>
+            <!-- 🔗 زر الانتقال إلى الصفحة الرئيسية في GitHub Pages -->
+<a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
+   style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+   الانتقال لصفحة تسجيل الدخول
+</a>
         </body>
         </html>
     `;
