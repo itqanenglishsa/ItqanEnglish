@@ -14,9 +14,51 @@
     let supabaseClient = null;
 
     // =========================================================
+    // 🎨 عرض صفحة منع الوصول (Access Denied View)
+    // =========================================================
+    const showAccessDeniedPage = () => {
+        document.documentElement.innerHTML = `
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>الوصول غير مصرح به | إتقان English</title>
+        </head>
+        <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; text-align:center; font-family:system-ui, -apple-system, sans-serif; background:#f8fafc; margin:0; padding:20px; box-sizing:border-box;">
+            
+            <div style="background:#ffffff; padding:40px 30px; border-radius:16px; box-shadow:0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); max-width:420px; width:100%;">
+                
+                <!-- 🖼️ صورة حماية المحتوى -->
+                <img src="forfun.PNG" 
+                     alt="Access Denied"
+                     onerror="this.style.display='none'"
+                     style="width:140px; height:auto; margin-bottom:20px; border-radius:12px;">
+
+                <!-- 🛑 عنوان التنبيـه -->
+                <h2 style="color:#ef4444; margin-top:0; margin-bottom:12px; font-size:1.4rem; font-weight:700;">
+                    عذراً، الوصول غير مصرح به! 🛑
+                </h2>
+
+                <!-- 📄 الرسالة النصية -->
+                <p style="color:#475569; font-size:1rem; line-height:1.6; margin-bottom:24px;">
+                    يجب عليك تسجيل الدخول والاشتراك في كورس الفوكاب أولاً لتتمكن من تصفح المحتوى.
+                </p>
+
+                <!-- 🔗 زر العودة للهوم بيج -->
+                <a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
+                   style="display:inline-block; width:100%; padding:12px 20px; background:#214ecf; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:600; font-size:1rem; box-sizing:border-box; transition:background 0.2s;">
+                    الانتقال للصفحة الرئيسية
+                </a>
+            </div>
+
+        </body>
+        </html>
+        `;
+    };
+
+    // =========================================================
     // 🛡️ دالة توليد معرف الجهاز المستقر (Device ID)
     // =========================================================
-    // تم تحسينها لتعطي معرف ثابت للجهاز بدلاً من البصمة المتغيرة
     const getDeviceId = () => {
         let deviceId = localStorage.getItem('itqan_device_id');
         if (!deviceId) {
@@ -38,7 +80,6 @@
 
         if (error || !profile) return;
 
-        // إذا لم يكن هناك جهاز مسجل (أول دخول)، يتم تسجيل الجهاز الحالي
         if (!profile.current_device_id) {
             await supabaseClient
                 .from('profiles')
@@ -47,7 +88,6 @@
             return;
         }
 
-        // إذا كان الجهاز الحالي مختلف عن المسجل في قاعدة البيانات -> طرد
         if (profile.current_device_id !== currentDevice) {
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
@@ -60,10 +100,7 @@
     // 🚦 تشغيل حارس البوابة
     // =========================================================
     const initAuthGuard = async () => {
-        // [ملاحظة]: إذا أردت تفعيل وضع التطوير محلياً يمكنك فك التعليق عن السطر التالي بنفسك عند التعديل
-        // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
-
-        // انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
+        // انتظار تحميل مكتبة Supabase
         let attempts = 0;
         while (!window.supabase && attempts < 100) {
             await new Promise(resolve => setTimeout(resolve, 50));
@@ -78,9 +115,9 @@
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // [الحماية 1]: إعادة توجيه غير المشتركين تلقائياً لصفحة الدخول
+        // [الحماية 1]: إظهار صفحة "الوصول غير مصرح به" لغير المشتركين
         if (!session || error) {
-            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
+            showAccessDeniedPage();
             return;
         }
 
@@ -106,17 +143,14 @@
 
     // 2. حظر اختصارات لوحة المفاتيح
     document.addEventListener('keydown', function (e) {
-        // F12
         if (e.key === 'F12' || e.keyCode === 123) {
             e.preventDefault();
             return false;
         }
-        // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
         if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) {
             e.preventDefault();
             return false;
         }
-        // Ctrl+U (عرض المصدر) / Ctrl+S (حفظ)
         if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) {
             e.preventDefault();
             return false;
