@@ -14,98 +14,81 @@
     let supabaseClient = null;
 
     // =========================================================
-    // 🛡️ دالت توليد بصمة الجهاز (Device Fingerprint)
+    // 🛡️ دالة توليد معرف الجهاز المستقر (Device ID)
     // =========================================================
-    const generateDeviceFingerprint = async () => {
-        const navigatorInfo = window.navigator.userAgent + window.navigator.language;
-        const screenInfo = window.screen.width + "x" + window.screen.height + window.screen.colorDepth;
-        
-        const msgBuffer = new TextEncoder().encode(navigatorInfo + screenInfo);
-        const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // تم تحسينها لتعطي معرف ثابت للجهاز بدلاً من البصمة المتغيرة
+    const getDeviceId = () => {
+        let deviceId = localStorage.getItem('itqan_device_id');
+        if (!deviceId) {
+            deviceId = 'dev_' + crypto.randomUUID();
+            localStorage.setItem('itqan_device_id', deviceId);
+        }
+        return deviceId;
     };
 
     // طرد الأجهزة المتعددة
     const enforceSingleSession = async (userId) => {
-        const currentDevice = await generateDeviceFingerprint();
+        const currentDevice = getDeviceId();
         
         let { data: profile, error } = await supabaseClient
-            .from('profiles') // تأكدي أن اسم جدول المستخدمين لديكِ هو profiles أو عدليه هنا
+            .from('profiles')
             .select('current_device_id')
             .eq('id', userId)
             .single();
 
         if (error || !profile) return;
 
+        // إذا لم يكن هناك جهاز مسجل (أول دخول)، يتم تسجيل الجهاز الحالي
         if (!profile.current_device_id) {
-            await supabaseClient.from('profiles').update({ current_device_id: currentDevice }).eq('id', userId);
+            await supabaseClient
+                .from('profiles')
+                .update({ current_device_id: currentDevice })
+                .eq('id', userId);
             return;
         }
 
+        // إذا كان الجهاز الحالي مختلف عن المسجل في قاعدة البيانات -> طرد
         if (profile.current_device_id !== currentDevice) {
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            window.location.href = "../login.html";
+            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
         }
     };
+
     // =========================================================
-    // 🚦 تشغيل حارس البوابة (معدل لوضع التطوير والموقع الحي)
+    // 🚦 تشغيل حارس البوابة
     // =========================================================
     const initAuthGuard = async () => {
-        // ✨ [ميزّة المطور]: إذا كنتِ تعملين محلياً عبر الـ Live Server، أوقفي الحرس فوراً وافتحي كورس الفوكاب للتعديل
-        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-            console.log("🛠️ وضع التطوير نشط: تم إيقاف الحماية مؤقتاً لتتمكني من تعديل كورس الفوكاب بحرية.");
-            return; // الخروج من دالة الحماية فوراً والسماح لكِ بالدخول
+        // [ملاحظة]: إذا أردت تفعيل وضع التطوير محلياً يمكنك فك التعليق عن السطر التالي بنفسك عند التعديل
+        // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
+
+        // انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
+        let attempts = 0;
+        while (!window.supabase && attempts < 100) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
         }
 
-        // انتظام انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
-        while (!window.supabase) {
-            await new Promise(resolve => setTimeout(resolve, 50));
+        if (!window.supabase) {
+            console.error("فشل تحميل مكتبة Supabase");
+            return;
         }
 
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
-     
-      if (!session || error) {
-    document.documentElement.innerHTML = `
-        <html dir="rtl">
-        <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
-        <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-           <!-- 🖼️ صورة أعلى رسالة الحماية -->
-<img src="forfun.PNG" 
-     alt="Access Denied"
-     style="width:180px; margin-bottom:20px; border-radius:12px;">
+        // [الحماية 1]: إعادة توجيه غير المشتركين تلقائياً لصفحة الدخول
+        if (!session || error) {
+            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
+            return;
+        }
 
-<h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي لو أبوك اللواء! 🛑</h2>
-<p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
-
-
-            <!-- 🔗 زر الانتقال إلى الصفحة الرئيسية في GitHub Pages -->
-            <a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
-               style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
-               الانتقال لصفحة تسجيل الدخول
-            </a>
-        </body>
-        </html>
-    `;
-
-    // setTimeout(() => { window.location.href = "../login.html"; }, 3000);
-
-    // ✔ تم الإبقاء على صفحة الحماية فقط دون أي انتقال
-    return;
-}
-
-
-
-        // [الحماية 2]: التحقق من بصمة الجهاز لمنع مشاركة الحسابات
+        // [الحماية 2]: التحقق من الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
         await enforceSingleSession(userId);
         
-        // فحص دوري كل 20 ثانية بالطرد اللحظي الحي
+        // فحص دوري كل 20 ثانية
         setInterval(async () => {
             await enforceSingleSession(userId);
         }, 20000);
@@ -115,57 +98,34 @@
     initAuthGuard();
 
     // =========================================================
-    // 🔒 وظائف الحماية القديمة (منع النسخ والـ Debugger)
+    // 🔒 وظائف منع النسخ وأدوات المطور
     // =========================================================
     
-    // 1. تعطيل النقر الأيمن تماماً
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-    }, false);
+    // 1. تعطيل القائمة اليمنى
+    document.addEventListener('contextmenu', e => e.preventDefault(), false);
 
-    // 2. حظر اختصارات لوحة المفاتيح الحساسة
+    // 2. حظر اختصارات لوحة المفاتيح
     document.addEventListener('keydown', function (e) {
+        // F12
         if (e.key === 'F12' || e.keyCode === 123) {
             e.preventDefault();
             return false;
         }
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.keyCode === 73 || e.keyCode === 74)) {
+        // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) {
             e.preventDefault();
             return false;
         }
-        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.keyCode === 67)) {
+        // Ctrl+U (عرض المصدر) / Ctrl+S (حفظ)
+        if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) {
             e.preventDefault();
             return false;
         }
     }, false);
 
-    // 3. منع تحديد النصوص والنسخ برمجياً داخل المنصة
-    document.addEventListener('selectstart', function (e) {
-        e.preventDefault();
-    }, false);
-
-    document.addEventListener('copy', function (e) {
-        e.preventDefault();
-    }, false);
-
-    // 4. مصيدة أدوات المطورين (Debugger Loop)
-    setInterval(function () {
-        (function () {
-            return false;
-        }['constructor']('debugger')());
-    }, 200);
-
-    // 5. حظر سحب وإفلات العناصر والصور
-    document.addEventListener('dragstart', function (e) {
-        e.preventDefault();
-    }, false);
+    // 3. منع تحديد النصوص والنسخ والسحب
+    document.addEventListener('selectstart', e => e.preventDefault(), false);
+    document.addEventListener('copy', e => e.preventDefault(), false);
+    document.addEventListener('dragstart', e => e.preventDefault(), false);
 
 })();
