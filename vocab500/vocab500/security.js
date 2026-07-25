@@ -13,8 +13,10 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY3lscGF4eGd1YnZob2ZwdXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjQwNzcsImV4cCI6MjA5ODUwMDA3N30.1AkiNkVi8uuJZgnwvRdKM_EF7RG5QjGE1if0ow0s6SU';
     let supabaseClient = null;
 
-    // 🔗 رابط صفحة الدخول/الموقع الرئيسي داخل مجلد itqan-html
-    const LOGIN_PAGE_URL = "https://itqanenglishsa.github.io/ItqanEnglish/itqan-html/";
+    // 🔗 تحديد مسار التوجيه النسبي:
+    // للخروج من مجلد vocab500/vocab500/ والوصول لصفحة الدخول
+    // قم بتعديل اسم الملف في النهاية (index.html أو itqan-html/login.html) حسب اسم صفحة الدخول لديكِ
+    const REDIRECT_PATH = "../../index.html"; 
 
     // =========================================================
     // 🛡️ دالة توليد معرف الجهاز المستقر (Device ID)
@@ -40,7 +42,6 @@
 
         if (error || !profile) return;
 
-        // تسجيل الجهاز عند أول دخول
         if (!profile.current_device_id) {
             await supabaseClient
                 .from('profiles')
@@ -49,12 +50,11 @@
             return;
         }
 
-        // إذا اختلف الجهاز -> طرد وتوجيه لصفحة الدخول
         if (profile.current_device_id !== currentDevice) {
             alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            window.location.replace(LOGIN_PAGE_URL);
+            window.location.replace(REDIRECT_PATH);
         }
     };
 
@@ -62,7 +62,6 @@
     // 🚦 تشغيل حارس البوابة
     // =========================================================
     const initAuthGuard = async () => {
-        // انتظار تحميل مكتبة Supabase
         let attempts = 0;
         while (!window.supabase && attempts < 100) {
             await new Promise(resolve => setTimeout(resolve, 50));
@@ -77,17 +76,17 @@
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // 🛑 [الحماية 1]: إذا لم يكن مسجلاً -> التوجيه الفوري لصفحة itqan-html
+        // 🛑 [الحماية 1]: إذا لم يكن هناك جلسة -> توجيه فوري للمسار النسبي
         if (!session || error) {
-            window.location.replace(LOGIN_PAGE_URL);
+            window.location.replace(REDIRECT_PATH);
             return;
         }
 
-        // 🔒 [الحماية 2]: التحقق من الجهاز
+        // 🔒 [الحماية 2]: التحقق من بصمة الجهاز
         const userId = session.user.id;
         await enforceSingleSession(userId);
 
-        // ✅ إظهار محتوى الكورس فقط بعد النجاح
+        // ✅ إظهار المحتوى فقط بعد إتمام الفحص بنجاح
         document.body.style.setProperty('display', 'block', 'important');
 
         // فحص دوري كل 20 ثانية
@@ -96,7 +95,7 @@
         }, 20000);
     };
 
-    // تشغيل نظام التحقق
+    // تشغيل الحماية
     initAuthGuard();
 
     // =========================================================
@@ -105,18 +104,9 @@
     document.addEventListener('contextmenu', e => e.preventDefault(), false);
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'F12' || e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) {
-            e.preventDefault();
-            return false;
-        }
+        if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) { e.preventDefault(); return false; }
+        if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) { e.preventDefault(); return false; }
     }, false);
 
     document.addEventListener('selectstart', e => e.preventDefault(), false);
