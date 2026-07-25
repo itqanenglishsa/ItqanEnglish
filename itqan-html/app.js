@@ -463,7 +463,7 @@ const actionButton = isPurchased
         <span>
   📖 ${
     c.key === "vocab500"
-      ? (lang === "ar" ? "14 وحدة" : "14 Units")
+      ? (lang === "ar" ? "١٤ وحدة" : "14 Units")
       : `${formatNumber(c.lessons)} ${t("courses.lessons")}`
   }
 </span>
