@@ -382,9 +382,10 @@ function renderSkill(skill, level){
 
     const courseLessons = fullCourse
       ? (
-          c.key === "vocab500"
-            ? (getLang() === 'ar' ? "14 وحدة" : "14 Units")
-            : `${fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات تفاعلية' : 'Units'}`
+         c.key === "vocab500"
+  ? (getLang() === 'ar' ? `${formatNumber(14)} وحدة` : "14 Units")
+
+            : `${getLang() === 'ar' ? formatNumber(fullCourse.lessons) : fullCourse.lessons} ${getLang() === 'ar' ? 'وحدات' : 'Units'}`
         )
       : "";
 
