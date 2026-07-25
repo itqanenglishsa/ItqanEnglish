@@ -70,36 +70,34 @@
 
         // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
      
-if (!session || error) {
+      if (!session || error) {
+    document.documentElement.innerHTML = `
+        <html dir="rtl">
+        <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
+        <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
+           <!-- 🖼️ صورة أعلى رسالة الحماية -->
+<img src="forfun.PNG" 
+     alt="Access Denied"
+     style="width:180px; margin-bottom:20px; border-radius:12px;">
 
-    // 🧹 تنظيف محتوى الصفحة لمنع ظهور المحتوى تحت صفحة التحذير
-    document.body.innerHTML = "";
-    document.body.style.overflow = "hidden"; // 🔒 منع التمرير للأسفل
+<h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي لو أبوك اللواء! 🛑</h2>
+<p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
 
-    // 🔒 حقن صفحة التحذير داخل الـ BODY فقط بدون المساس بالحماية
-    document.body.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-
-            <!-- 🖼️ صورة أعلى رسالة الحماية -->
-            <img src="forfun.PNG" 
-                 alt="Access Denied"
-                 style="width:180px; margin-bottom:20px; border-radius:12px;">
-
-            <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي لو أبوك اللواء! 🛑</h2>
-            <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
 
             <!-- 🔗 زر الانتقال إلى الصفحة الرئيسية في GitHub Pages -->
             <a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
                style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
                الانتقال لصفحة تسجيل الدخول
             </a>
-
-        </div>
+        </body>
+        </html>
     `;
 
+    // setTimeout(() => { window.location.href = "../login.html"; }, 3000);
+
+    // ✔ تم الإبقاء على صفحة الحماية فقط دون أي انتقال
     return;
 }
-
 
 
 
