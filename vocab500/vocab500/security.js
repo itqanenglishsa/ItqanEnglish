@@ -69,20 +69,31 @@
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
         // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
-        if (!session || error) {
-            document.documentElement.innerHTML = `
-                <html dir="rtl">
-                <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
-                <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-                    <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، الوصول غير مصرح به! 🛑</h2>
-                    <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في كورس الفوكاب أولاً لتتمكن من تصفح المحتوى.</p>
-                    <a href="../login.html" style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">الانتقال لصفحة تسجيل الدخول</a>
-                </body>
-                </html>
-            `;
-            setTimeout(() => { window.location.href = "../login.html"; }, 3000);
-            return;
-        }
+     // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
+if (!session || error) {
+    document.documentElement.innerHTML = `
+        <html dir="rtl">
+        <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
+        <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
+            <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، الوصول غير مصرح به! 🛑</h2>
+            <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في كورس الفوكاب أولاً لتتمكن من تصفح المحتوى.</p>
+
+            <!-- 🔗 زر الانتقال لصفحة الموقع الأساسية -->
+            <a href="../index.html" 
+               style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+               الانتقال لصفحة تسجيل الدخول
+            </a>
+        </body>
+        </html>
+    `;
+
+    // ❌ كان هنا إعادة توجيه تلقائية تسبب صفحة 404
+    // setTimeout(() => { window.location.href = "../login.html"; }, 3000);
+
+    // ✔ تمت إزالته نهائيًا لمنع الانتقال لصفحة الخطأ
+    return;
+}
+
 
         // [الحماية 2]: التحقق من بصمة الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
