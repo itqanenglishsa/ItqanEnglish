@@ -1,17 +1,22 @@
 /**
  * 🔒 نظام الحماية والأمان المتقدم - منصة إتقان English (دورة 500 مفردة Vocab) © 2026
+ * تم التطوير لحماية المحتوى التعليمي ومنع الدخول غير المصرح به ومشاركة الحسابات.
  */
 
 (function () {
     'use strict';
 
+    // =========================================================
+    // ⚙️ إعداد وتكوين اتصال Supabase
+    // =========================================================
     const supabaseUrl = 'https://jacylpaxxgubvhofpuup.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphY3lscGF4eGd1YnZob2ZwdXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjQwNzcsImV4cCI6MjA5ODUwMDA3N30.1AkiNkVi8uuJZgnwvRdKM_EF7RG5QjGE1if0ow0s6SU';
     let supabaseClient = null;
 
-    // المسار لصفحة الحظر المباشرة داخل نفس مجلد الكورس
-    const REDIRECT_PATH = "no-access.html"; 
-
+    // =========================================================
+    // 🛡️ دالة توليد معرف الجهاز المستقر (Device ID)
+    // =========================================================
+    // تم تحسينها لتعطي معرف ثابت للجهاز بدلاً من البصمة المتغيرة
     const getDeviceId = () => {
         let deviceId = localStorage.getItem('itqan_device_id');
         if (!deviceId) {
@@ -21,94 +26,104 @@
         return deviceId;
     };
 
-    // التحقق من الجلسة الواحدة + اشتراك الكورس
-    const checkUserAccess = async (userId) => {
+    // طرد الأجهزة المتعددة
+    const enforceSingleSession = async (userId) => {
         const currentDevice = getDeviceId();
         
-        // جلب بيانات الحساب للتأكد من الجهاز وحالة الاشتراك
         let { data: profile, error } = await supabaseClient
             .from('profiles')
-            .select('current_device_id, is_subscribed_vocab') // 👈 تأكدي من اسم عامود الاشتراك في جدولك (مثلاً is_subscribed_vocab)
+            .select('current_device_id')
             .eq('id', userId)
             .single();
 
-        if (error || !profile) return false;
+        if (error || !profile) return;
 
-        // 🛑 إذا كان الحساب غير مشترك في كورس الفوكاب
-        // (ملاحظة: إذا لم يكن لديك عامود إشتراك، يمكنك حذف شرط !profile.is_subscribed_vocab)
-        if (profile.is_subscribed_vocab === false) {
-            return false;
-        }
-
-        // تسجيل الجهاز الأول
+        // إذا لم يكن هناك جهاز مسجل (أول دخول)، يتم تسجيل الجهاز الحالي
         if (!profile.current_device_id) {
             await supabaseClient
                 .from('profiles')
                 .update({ current_device_id: currentDevice })
                 .eq('id', userId);
-            return true;
+            return;
         }
 
-        // طرد إذا كان فتح من جهاز آخر
+        // إذا كان الجهاز الحالي مختلف عن المسجل في قاعدة البيانات -> طرد
         if (profile.current_device_id !== currentDevice) {
-            alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر!");
+            alert("🛑 تنبيه أمني: تم فتح هذا الحساب من جهاز أو متصفح آخر! سيتم تسجيل خروجك لحماية المحتوى.");
             await supabaseClient.auth.signOut();
             localStorage.clear();
-            return false;
+            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
         }
-
-        return true;
     };
 
+    // =========================================================
+    // 🚦 تشغيل حارس البوابة
+    // =========================================================
     const initAuthGuard = async () => {
+        // [ملاحظة]: إذا أردت تفعيل وضع التطوير محلياً يمكنك فك التعليق عن السطر التالي بنفسك عند التعديل
+        // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") return;
+
+        // انتظار تحميل مكتبة Supabase الخارجية من الـ HTML
         let attempts = 0;
         while (!window.supabase && attempts < 100) {
             await new Promise(resolve => setTimeout(resolve, 50));
             attempts++;
         }
 
-        if (!window.supabase) return;
+        if (!window.supabase) {
+            console.error("فشل تحميل مكتبة Supabase");
+            return;
+        }
 
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
-        // 🛑 1. شخص فتح الرابط بدون تسجيل دخول مطلقاً (رابط مشارك)
+        // [الحماية 1]: إعادة توجيه غير المشتركين تلقائياً لصفحة الدخول
         if (!session || error) {
-            window.location.replace(REDIRECT_PATH);
+            window.location.href = "https://itqanenglishsa.github.io/ItqanEnglish/";
             return;
         }
 
-        // 🔒 2. شخص مسجل دخول ولكن يتم الفحص هل هو مشترك أم لا / هل الجهاز مختلف
+        // [الحماية 2]: التحقق من الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
-        const hasAccess = await checkUserAccess(userId);
-
-        if (!hasAccess) {
-            window.location.replace(REDIRECT_PATH);
-            return;
-        }
-
-        // ✅ مشترِك رسمي وفي جهازه المصرح -> إظهار المحتوى
-        document.body.style.setProperty('display', 'block', 'important');
-
+        await enforceSingleSession(userId);
+        
         // فحص دوري كل 20 ثانية
         setInterval(async () => {
-            const stillValid = await checkUserAccess(userId);
-            if (!stillValid) {
-                window.location.replace(REDIRECT_PATH);
-            }
+            await enforceSingleSession(userId);
         }, 20000);
     };
 
+    // تشغيل نظام التحقق
     initAuthGuard();
 
-    // منع أدوات المطور والنسخ
+    // =========================================================
+    // 🔒 وظائف منع النسخ وأدوات المطور
+    // =========================================================
+    
+    // 1. تعطيل القائمة اليمنى
     document.addEventListener('contextmenu', e => e.preventDefault(), false);
+
+    // 2. حظر اختصارات لوحة المفاتيح
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
-        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) { e.preventDefault(); return false; }
-        if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) { e.preventDefault(); return false; }
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (عرض المصدر) / Ctrl+S (حفظ)
+        if (e.ctrlKey && ['u', 'U', 's', 'S'].includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
     }, false);
 
+    // 3. منع تحديد النصوص والنسخ والسحب
     document.addEventListener('selectstart', e => e.preventDefault(), false);
     document.addEventListener('copy', e => e.preventDefault(), false);
     document.addEventListener('dragstart', e => e.preventDefault(), false);
