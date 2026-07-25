@@ -51,9 +51,7 @@
         }
     };
 
-    // =========================================================
-    // 🚦 تشغيل حارس البوابة (التحقق من الدفع والاشتراك الحقيقي)
-    // =========================================================
+  
   // =========================================================
     // 🚦 تشغيل حارس البوابة (معدل لوضع التطوير والموقع الحي)
     // =========================================================
@@ -73,20 +71,28 @@
         const { data: { session }, error } = await supabaseClient.auth.getSession();
 
         // [الحماية 1]: طرد غير المشتركين (الروابط المنسوخة)
-        if (!session || error) {
-            document.documentElement.innerHTML = `
-                <html dir="rtl">
-                <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
-                <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
-                    <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، الوصول غير مصرح به! 🛑</h2>
-                    <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
-                    <a href="../login.html" style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">الانتقال لصفحة تسجيل الدخول</a>
-                </body>
-                </html>
-            `;
-            setTimeout(() => { window.location.href = "../login.html"; }, 3000);
-            return;
-        }
+      if (!session || error) {
+    document.documentElement.innerHTML = `
+        <html dir="rtl">
+        <head><meta charset="utf-8"><title>الوصول غير مصرح به</title></head>
+        <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; background:#f8fafc; margin:0; padding:20px;">
+            <h2 style="color:#ef4444; margin-bottom:8px;">عذراً، والله ما تمشي لو أبوك اللواء! 🛑</h2>
+            <p style="color:#64748b; font-size:1.1rem;">يجب عليك تسجيل الدخول والاشتراك في الكورس أولاً لتتمكن من تصفح المحتوى.</p>
+
+            <!-- 🔗 زر الانتقال إلى الصفحة الرئيسية في GitHub Pages -->
+            <a href="https://itqanenglishsa.github.io/ItqanEnglish/" 
+               style="margin-top:16px; padding:10px 20px; background:#214ecf; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+               الانتقال لصفحة تسجيل الدخول
+            </a>
+        </body>
+        </html>
+    `;
+
+    // setTimeout(() => { window.location.href = "../login.html"; }, 3000);
+
+    // ✔ تم الإبقاء على صفحة الحماية فقط دون أي انتقال
+    return;
+}
 
         // [الحماية 2]: التحقق من بصمة الجهاز لمنع مشاركة الحسابات
         const userId = session.user.id;
